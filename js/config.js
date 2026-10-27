@@ -1,0 +1,3 @@
+// Reemplaza con tus credenciales reales de Supabase
+const SUPABASE_URL = 'https://idnwdzlyykahsscwyxva.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlkbndkemx5eWthaHNzY3d5eHZhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI5ODgwMjYsImV4cCI6MjEwODU2NDAyNn0.S38PcJzLmNcBLjfsp4zoXBOxz45pTG8UoCJuXNlhvJA';
