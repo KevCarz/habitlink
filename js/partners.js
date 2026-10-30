@@ -42,6 +42,7 @@ modalPartner.addEventListener('click', event => {
 
 searchUsername.addEventListener('input', () => {
     clearTimeout(searchTimeout);
+    if (!currentUser) return;
     const query = searchUsername.value.trim();
     const requestSequence = ++searchSequence;
 
@@ -325,7 +326,10 @@ async function unsubscribePartnerRealtime() {
 }
 
 function resetPartnerSession() {
+    clearTimeout(searchTimeout);
+    searchSequence++;
     currentUser = null;
+    if (searchResults) searchResults.replaceChildren();
 }
 
 window.initPartners = initPartners;

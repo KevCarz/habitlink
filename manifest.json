@@ -2,7 +2,7 @@
   "name": "HabitLink",
   "short_name": "HabitLink",
   "description": "App de accountability y hábitos compartidos.",
-  "start_url": "/habitlink/index.html",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f9fafb",
   "theme_color": "#4f46e5",

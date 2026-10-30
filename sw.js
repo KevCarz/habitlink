@@ -1,4 +1,4 @@
-const CACHE_NAME = 'habitlink-v1.0.0';
+const CACHE_NAME = 'habitlink-v1.0.1';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
@@ -41,25 +41,28 @@ self.addEventListener('activate', (event) => {
     self.clients.claim();
 });
 
-// 3. Interceptación de peticiones: Estrategia "Cache First, Network Fallback"
+// 3. Interceptación de peticiones: red primero para mantener la app actualizada
 self.addEventListener('fetch', (event) => {
-    // Ignorar peticiones que no sean GET o que sean de la API de Supabase (necesitan red)
     if (event.request.method !== 'GET' || event.request.url.includes('supabase.co')) {
         return;
     }
 
     event.respondWith(
-        caches.match(event.request).then((cachedResponse) => {
-            if (cachedResponse) {
-                return cachedResponse; // Servir desde caché si existe
-            }
-            // Si no está en caché, ir a la red
-            return fetch(event.request).catch(() => {
-                // Fallback offline si no hay red y no está en caché
+        fetch(event.request)
+            .then((response) => {
+                if (response.ok) {
+                    const copy = response.clone();
+                    caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+                }
+                return response;
+            })
+            .catch(async () => {
+                const cachedResponse = await caches.match(event.request);
+                if (cachedResponse) return cachedResponse;
                 if (event.request.mode === 'navigate') {
                     return caches.match('./index.html');
                 }
-            });
-        })
+                return Response.error();
+            })
     );
 });
