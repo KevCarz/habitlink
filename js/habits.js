@@ -85,12 +85,10 @@ async function loadHabits() {
     });
 
     const completedToday = new Set(logs.filter(log => log.log_date === today).map(log => log.habit_id));
-    const completedThisWeek = new Set(logs.filter(log => {
-        const logDate = new Date(log.log_date);
-        const weekStart = new Date();
-        weekStart.setDate(weekStart.getDate() - weekStart.getDay() + (weekStart.getDay() === 0 ? -6 : 1)); // Lunes
-        return logDate >= weekStart;
-    }).map(log => log.habit_id));
+    const weekStart = getWeekStartDate();
+    const completedThisWeek = new Set(logs
+        .filter(log => log.log_date >= weekStart && log.log_date <= today)
+        .map(log => log.habit_id));
 
     const dailyHabits = habits.filter(habit => habit.frequency === 'daily');
     const weeklyHabits = habits.filter(habit => habit.frequency === 'weekly');
@@ -149,63 +147,6 @@ async function loadHabits() {
                     <button type="button" data-action="delete" data-habit-id="${escapeHTML(habit.id)}" class="rounded bg-red-100 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50" aria-label="Eliminar">
                         🗑
                     </button>
-                </div>
-            </div>`;
-        habitsList.appendChild(card);
-    }
-}    
-    clearHabitError();
-    habitsList.replaceChildren();
-    const today = getLocalDateString();
-    const weekStart = getWeekStartDate();
-
-    if (!habits?.length) {
-        dailySummary.textContent = '0 de 0 hábitos completados hoy';
-        weeklySummary.textContent = '0 de 0 hábitos semanales completados';
-        emptyState.classList.remove('hidden');
-        return;
-    }
-
-    const { data: logs, error: logsError } = await supabaseClient
-        .from('habit_logs')
-        .select('habit_id, log_date')
-        .in('habit_id', habits.map(habit => habit.id))
-        .gte('log_date', weekStart)
-        .lte('log_date', today);
-
-    if (logsError) {
-        console.error('Error cargando registros de hábitos:', logsError);
-        showHabitError('No se pudo cargar el progreso de esta semana. Comprueba los permisos de Supabase.');
-        return;
-    }
-
-    const completedToday = new Set(logs.filter(log => log.log_date === today).map(log => log.habit_id));
-    const completedThisWeek = new Set(logs.map(log => log.habit_id));
-    const dailyHabits = habits.filter(habit => habit.frequency === 'daily');
-    const weeklyHabits = habits.filter(habit => habit.frequency === 'weekly');
-    const completedDailyCount = dailyHabits.filter(habit => completedToday.has(habit.id)).length;
-    const completedWeeklyCount = weeklyHabits.filter(habit => completedThisWeek.has(habit.id)).length;
-
-    dailySummary.textContent = `${completedDailyCount} de ${dailyHabits.length} hábitos diarios completados hoy`;
-    weeklySummary.textContent = `${completedWeeklyCount} de ${weeklyHabits.length} hábitos semanales completados esta semana`;
-    emptyState.classList.add('hidden');
-
-    for (const habit of habits) {
-        const isWeekly = habit.frequency === 'weekly';
-        const isCompleted = (isWeekly ? completedThisWeek : completedToday).has(habit.id);
-        const card = document.createElement('article');
-        card.className = `rounded-lg border-l-4 bg-white p-5 shadow dark:bg-gray-800 ${isCompleted ? 'border-green-500' : 'border-indigo-500'}`;
-        card.innerHTML = `
-            <div class="mb-2 flex items-start justify-between gap-2">
-                <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100 ${isCompleted ? 'line-through text-gray-400 dark:text-gray-400' : ''}">${escapeHTML(habit.title)}</h3>
-                <span class="shrink-0 rounded-full px-2 py-1 text-xs ${isWeekly ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}">${isWeekly ? 'Semanal' : 'Diario'}</span>
-            </div>
-            ${habit.description ? `<p class="mb-3 text-sm text-gray-500 dark:text-gray-300">${escapeHTML(habit.description)}</p>` : ''}
-            <div class="mt-4 flex items-center justify-between gap-2">
-                <span class="text-sm text-gray-500 dark:text-gray-300">${isCompleted ? (isWeekly ? '✓ Hecho esta semana' : '✓ Hecho hoy') : (isWeekly ? 'Pendiente esta semana' : 'Pendiente hoy')}</span>
-                <div class="flex gap-2">
-                    <button type="button" data-action="toggle" data-habit-id="${escapeHTML(habit.id)}" data-frequency="${isWeekly ? 'weekly' : 'daily'}" data-completed="${isCompleted}" class="rounded px-3 py-1 text-sm font-medium ${isCompleted ? 'bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-200' : 'bg-green-500 text-white hover:bg-green-600'}">${isCompleted ? 'Desmarcar' : 'Marcar'}</button>
-                    <button type="button" data-action="delete" data-habit-id="${escapeHTML(habit.id)}" class="rounded bg-red-100 px-3 py-1 text-sm font-medium text-red-600 hover:bg-red-200 dark:bg-red-950 dark:text-red-200 dark:hover:bg-red-900" aria-label="Eliminar ${escapeHTML(habit.title)}">Eliminar</button>
                 </div>
             </div>`;
         habitsList.appendChild(card);
