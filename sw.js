@@ -1,4 +1,4 @@
-const CACHE_NAME = 'habitlink-v1.0.1';
+const CACHE_NAME = 'habitlink-v1.0.2';  // Cambia de v1.0.1 a v1.0.2
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
@@ -37,7 +37,6 @@ self.addEventListener('activate', (event) => {
             );
         })
     );
-    // Tomar el control de todas las páginas inmediatamente
     self.clients.claim();
 });
 
