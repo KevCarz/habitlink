@@ -32,7 +32,13 @@ function showHabitFormMessage(message, isError = false) {
 async function loadHabits() {
     if (!supabaseClient) return;
 
-    const { data: { user } } = await supabaseClient.auth.getUser();
+    const { data: userData, error: authError } = await supabaseClient.auth.getUser();
+    if (authError) {
+        console.error('Error obteniendo el usuario:', authError);
+        showHabitError('No se pudo verificar tu sesión.');
+        return;
+    }
+    const user = userData?.user;
     if (!user) return;
 
     const { data: habits, error } = await supabaseClient
@@ -75,19 +81,18 @@ async function loadHabits() {
         return;
     }
 
+    const habitLogs = logs ?? [];
     const logsByHabit = {};
-    logs.forEach(log => {
+    habitLogs.forEach(log => {
         if (!logsByHabit[log.habit_id]) logsByHabit[log.habit_id] = new Set();
         logsByHabit[log.habit_id].add(log.log_date);
     });
 
-    const completedToday = new Set(logs.filter(log => log.log_date === today).map(log => log.habit_id));
-    const completedThisWeek = new Set(logs.filter(log => {
-        const logDate = new Date(log.log_date);
-        const weekStart = new Date();
-        weekStart.setDate(weekStart.getDate() - weekStart.getDay() + (weekStart.getDay() === 0 ? -6 : 1));
-        return logDate >= weekStart;
-    }).map(log => log.habit_id));
+    const weekStart = getWeekStartDate();
+    const completedToday = new Set(habitLogs.filter(log => log.log_date === today).map(log => log.habit_id));
+    const completedThisWeek = new Set(habitLogs
+        .filter(log => log.log_date >= weekStart && log.log_date <= today)
+        .map(log => log.habit_id));
 
     const dailyHabits = habits.filter(habit => habit.frequency === 'daily');
     const weeklyHabits = habits.filter(habit => habit.frequency === 'weekly');
@@ -164,6 +169,10 @@ async function toggleHabit(habitId, frequency, isCompleted) {
             const { error } = await supabaseClient
                 .from('habit_logs')
                 .insert({ habit_id: habitId, log_date: today });
+            if (error?.code === '23505') {
+                await loadHabits();
+                return;
+            }
             if (error) throw error;
         }
 
@@ -206,7 +215,9 @@ habitForm.addEventListener('submit', async event => {
     habitSubmitBtn.disabled = true;
     showHabitFormMessage('Creando hábito...');
     try {
-        const { data: { user } } = await supabaseClient.auth.getUser();
+        const { data: userData, error: userError } = await supabaseClient.auth.getUser();
+        if (userError) throw userError;
+        const user = userData?.user;
         if (!user) throw new Error('Inicia sesión');
 
         const { error } = await supabaseClient
