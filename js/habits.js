@@ -177,9 +177,10 @@ async function toggleHabit(habitId, frequency, isCompleted) {
                 throw error;
             }
         } else {
+            // MARCAR: Verificar si ya existe
             const { data: existingLog, error: checkError } = await supabaseClient
                 .from('habit_logs')
-                .select('habit_id')
+                .select('id')
                 .eq('habit_id', habitId)
                 .eq('log_date', today)
                 .maybeSingle();
@@ -190,16 +191,17 @@ async function toggleHabit(habitId, frequency, isCompleted) {
             }
 
             if (!existingLog) {
+                // Solo insertar si no existe
                 const { error: insertError } = await supabaseClient
                     .from('habit_logs')
-                    .insert({ habit_id: habitId, log_date: today });
+                    .insert({ 
+                        habit_id: habitId, 
+                        log_date: today,
+                        completed_at: new Date().toISOString()
+                    });
 
-                if (insertError?.code === '23505') {
-                    await loadHabits();
-                    return;
-                }
                 if (insertError) {
-                    console.error('Error insertando registro del hábito:', insertError);
+                    console.error('Error insertando log:', insertError);
                     throw insertError;
                 }
             }
@@ -208,10 +210,10 @@ async function toggleHabit(habitId, frequency, isCompleted) {
         await loadHabits();
     } catch (error) {
         console.error('Error actualizando el progreso:', error);
-        const detail = error?.message || 'Error desconocido';
-        showHabitError(`No se pudo actualizar el hábito: ${detail}`);
+        showHabitError(`No se pudo actualizar el hábito: ${error.message || 'Error desconocido'}`);
     }
 }
+
 habitsList.addEventListener('click', async event => {
     const button = event.target.closest('button[data-action]');
     if (!button) return;
