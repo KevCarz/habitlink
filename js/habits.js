@@ -85,10 +85,12 @@ async function loadHabits() {
     });
 
     const completedToday = new Set(logs.filter(log => log.log_date === today).map(log => log.habit_id));
-    const weekStart = getWeekStartDate();
-    const completedThisWeek = new Set(logs
-        .filter(log => log.log_date >= weekStart && log.log_date <= today)
-        .map(log => log.habit_id));
+    const completedThisWeek = new Set(logs.filter(log => {
+        const logDate = new Date(log.log_date);
+        const weekStart = new Date();
+        weekStart.setDate(weekStart.getDate() - weekStart.getDay() + (weekStart.getDay() === 0 ? -6 : 1)); // Lunes
+        return logDate >= weekStart;
+    }).map(log => log.habit_id));
 
     const dailyHabits = habits.filter(habit => habit.frequency === 'daily');
     const weeklyHabits = habits.filter(habit => habit.frequency === 'weekly');
@@ -152,7 +154,6 @@ async function loadHabits() {
         habitsList.appendChild(card);
     }
 }
-
 async function toggleHabit(habitId, frequency, isCompleted) {
     try {
         const today = getLocalDateString();
