@@ -78,9 +78,13 @@ async function initializeAuthenticatedSession(session) {
         await loadUserProfile(session.user.id);
         // Cada carga central de hábitos actualiza también sus resúmenes y gráficas.
         await Promise.all([
-            loadHabits(),
-            initPartners(session.user)
-        ]);
+    loadHabits(), 
+    loadYearlyHeatmap(), 
+    loadWeeklyCharts(), 
+    loadBadges(),           // ← Agregar
+    checkAndUnlockBadges(), // ← Agregar
+    initPartners(session.user)
+]);
         subscribeToRealtime(session.user.id);
         subscribeToPartnerChanges(session.user.id);
     })();
@@ -116,6 +120,17 @@ const navDashboard = document.getElementById('nav-dashboard');
 const navStats = document.getElementById('nav-stats');
 const viewDashboard = document.getElementById('view-dashboard');
 const viewStats = document.getElementById('view-stats');
+// Toggle del panel de insignias
+const badgesToggle = document.getElementById('badges-toggle');
+const badgesPanel = document.getElementById('badges-panel');
+const badgesToggleIcon = document.getElementById('badges-toggle-icon');
+
+if (badgesToggle) {
+    badgesToggle.addEventListener('click', () => {
+        const isHidden = badgesPanel.classList.toggle('hidden');
+        badgesToggleIcon.textContent = isHidden ? '▼' : '▲';
+    });
+}
 
 function switchView(target) {
     const showingDashboard = target === 'dashboard';

@@ -65,6 +65,29 @@
         <section id="view-dashboard" class="hidden flex flex-1 flex-col bg-gray-50 dark:bg-gray-900">
             <!-- Cabecera del dashboard: contiene la navegación y las acciones principales. -->
             <header class="flex flex-wrap items-center justify-between gap-4 bg-white px-6 py-4 shadow-sm dark:bg-gray-800">
+                <!-- Panel de Insignias (colapsable) -->
+<div class="bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 border-b border-yellow-200 dark:border-yellow-800">
+    <div class="max-w-7xl mx-auto px-6 py-3">
+        <div class="flex items-center justify-between cursor-pointer" id="badges-toggle">
+            <div class="flex items-center gap-3">
+                <span class="text-2xl">🏆</span>
+                <div>
+                    <h3 class="text-sm font-bold text-gray-800 dark:text-gray-100">Mis Insignias</h3>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">
+                        <span id="badges-unlocked-count">0</span> de <span id="badges-total-count">0</span> desbloqueadas
+                    </p>
+                </div>
+            </div>
+            <button class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" id="badges-toggle-icon">▼</button>
+        </div>
+        
+        <div id="badges-panel" class="hidden mt-4 pb-2">
+            <div id="badges-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                <!-- Insignias inyectadas por JS -->
+            </div>
+        </div>
+    </div>
+</div>
                 <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-5">
                     <div>
                         <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">HabitLink</h1>
@@ -86,6 +109,7 @@
                     <button id="btn-logout" type="button" class="rounded-md bg-gray-200 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 dark:focus:ring-offset-gray-800">Salir</button>
                 </div>
             </header>
+
             <main id="main-content" class="grid flex-1 grid-cols-1 gap-6 overflow-y-auto p-6 lg:grid-cols-3">
                 <section class="lg:col-span-2" aria-labelledby="habits-heading">
                     <h2 id="habits-heading" class="mb-4 text-lg font-semibold text-gray-700 dark:text-gray-200">Mis hábitos</h2>
@@ -265,6 +289,7 @@
     <script src="js/habits.js"></script>
     <script src="js/partners.js"></script>
     <script src="js/stats.js"></script>
+    <script src="js/badges.js"></script>
     <script src="js/app.js"></script>
     
 </body>

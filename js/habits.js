@@ -499,6 +499,10 @@ async function toggleHabit(habitId, frequency, isCompleted) {
         console.error('Error actualizando el progreso:', error);
         showHabitError(`No se pudo actualizar: ${error.message}`);
     }
+    // Verificar insignias después de actualizar
+if (typeof checkAndUnlockBadges === 'function') {
+    checkAndUnlockBadges();
+}
 }
 
 habitsList.addEventListener('click', async event => {
