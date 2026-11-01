@@ -67,12 +67,11 @@ async function initializeAuthenticatedSession(session) {
         clearAppError();
         showView('view-dashboard');
         await loadUserProfile(session.user.id);
+        // Cada carga central de hábitos actualiza también sus resúmenes y gráficas.
         await Promise.all([
-    loadHabits(), 
-    loadYearlyHeatmap(), 
-    loadWeeklyCharts(),  // ← Agregar esta línea
-    initPartners(session.user)
-]);
+            loadHabits(),
+            initPartners(session.user)
+        ]);
         subscribeToRealtime(session.user.id);
         subscribeToPartnerChanges(session.user.id);
     })();

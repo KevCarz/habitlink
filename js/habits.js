@@ -11,6 +11,12 @@ const habitSubmitBtn = document.getElementById('habit-submit-btn');
 let habitRealtimeChannel = null;
 let habitMessageTimeout = null;
 
+// Convierte una fecha YYYY-MM-DD sin desplazarla al día anterior por UTC.
+function parseLocalDate(dateString) {
+    const [year, month, day] = dateString.split('-').map(Number);
+    return new Date(year, month - 1, day);
+}
+
 function showHabitError(message) {
     habitsError.textContent = message;
     habitsError.classList.remove('hidden');
@@ -72,7 +78,7 @@ async function loadHabits() {
         dailySummary.textContent = '0 de 0 hábitos diarios completados hoy';
         weeklySummary.textContent = '0 de 0 hábitos semanales completados';
         emptyState.classList.remove('hidden');
-        await loadYearlyHeatmap();
+        await Promise.all([loadYearlyHeatmap(), loadWeeklyCharts()]);
         return;
     }
 
@@ -162,8 +168,8 @@ async function loadHabits() {
         habitsList.appendChild(card);
     }
 
-    // Mantener sincronizadas la lista y la actividad anual tras cada cambio.
-    await loadYearlyHeatmap();
+    // Mantener sincronizadas la lista, el mapa anual y las gráficas semanales.
+    await Promise.all([loadYearlyHeatmap(), loadWeeklyCharts()]);
 }
 
 async function loadYearlyHeatmap() {
@@ -278,7 +284,12 @@ async function loadYearlyHeatmap() {
 async function loadWeeklyCharts() {
     if (!supabaseClient) return;
 
-    const { data: { user } } = await supabaseClient.auth.getUser();
+    const { data: userData, error: authError } = await supabaseClient.auth.getUser();
+    if (authError) {
+        console.error('Error obteniendo el usuario para las gráficas:', authError);
+        return;
+    }
+    const user = userData?.user;
     if (!user) return;
 
     // Calcular inicio y fin de la semana actual (lunes a domingo)
@@ -300,19 +311,22 @@ async function loadWeeklyCharts() {
     // Obtener hábitos del usuario
     const { data: myHabits, error: habitsError } = await supabaseClient
         .from('habits')
-        .select('id')
+        .select('id, frequency')
         .eq('user_id', user.id);
 
     if (habitsError || !myHabits?.length) {
-        document.getElementById('weekly-bars').innerHTML = 
+        document.getElementById('weekly-bars').innerHTML =
             '<p class="text-center text-sm text-gray-400 py-4">Aún no hay hábitos</p>';
+        document.getElementById('weekly-percentage').textContent = '0%';
+        document.getElementById('my-weekly-pct').textContent = '0%';
+        document.getElementById('partner-comparison').classList.add('hidden');
         return;
     }
 
     // Obtener logs de esta semana
     const { data: myLogs, error: logsError } = await supabaseClient
         .from('habit_logs')
-        .select('log_date')
+        .select('habit_id, log_date')
         .in('habit_id', myHabits.map(h => h.id))
         .gte('log_date', weekStartStr)
         .lte('log_date', weekEndStr);
@@ -325,20 +339,29 @@ async function loadWeeklyCharts() {
     // Calcular cumplimiento por día
     const daysOfWeek = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
     const daysCompleted = [0, 0, 0, 0, 0, 0, 0];
-    const totalPerDay = myHabits.length;
+    const dailyHabits = myHabits.filter(habit => habit.frequency === 'daily');
+    const weeklyHabits = myHabits.filter(habit => habit.frequency === 'weekly');
+    const dailyHabitIds = new Set(dailyHabits.map(habit => habit.id));
+    const weeklyHabitIds = new Set(weeklyHabits.map(habit => habit.id));
+    const completedWeeklyIds = new Set();
+    const totalPerDay = dailyHabits.length;
 
-    myLogs.forEach(log => {
-        const logDate = new Date(log.log_date);
-        let dayIndex = logDate.getDay() - 1; // 0=Lunes
-        if (dayIndex < 0) dayIndex = 6; // Domingo
-        daysCompleted[dayIndex]++;
+    // Contar solo hábitos diarios en las barras; los semanales cuentan una vez por semana.
+    (myLogs ?? []).forEach(log => {
+        const logDate = parseLocalDate(log.log_date);
+        let dayIndex = logDate.getDay() - 1;
+        if (dayIndex < 0) dayIndex = 6;
+
+        if (dailyHabitIds.has(log.habit_id)) daysCompleted[dayIndex]++;
+        if (weeklyHabitIds.has(log.habit_id)) completedWeeklyIds.add(log.habit_id);
     });
 
-    // Calcular porcentaje total de la semana
-    const totalPossible = totalPerDay * 7;
-    const totalCompleted = daysCompleted.reduce((a, b) => a + b, 0);
-    const weeklyPct = totalPossible > 0 ? Math.round((totalCompleted / totalPossible) * 100) : 0;
+    const elapsedDays = Math.min(7, Math.round((parseLocalDate(getLocalDateString()) - weekStart) / 86400000) + 1);
+    const totalPossible = (totalPerDay * elapsedDays) + weeklyHabits.length;
+    const totalCompleted = daysCompleted.reduce((a, b) => a + b, 0) + completedWeeklyIds.size;
+    const weeklyPct = totalPossible > 0 ? Math.min(100, Math.round((totalCompleted / totalPossible) * 100)) : 0;
     document.getElementById('weekly-percentage').textContent = `${weeklyPct}%`;
+    document.getElementById('my-weekly-pct').textContent = `${weeklyPct}%`;
 
     // Renderizar barras por día
     const barsContainer = document.getElementById('weekly-bars');
@@ -359,10 +382,10 @@ async function loadWeeklyCharts() {
     }).join('');
 
     // Cargar comparativa con compañero
-    await loadPartnerComparison(user.id, weekStartStr, weekEndStr, totalPerDay, weeklyPct);
+    await loadPartnerComparison(user.id, weekStartStr, weekEndStr, weeklyPct);
 }
 
-async function loadPartnerComparison(userId, weekStartStr, weekEndStr, myHabitsCount, myWeeklyPct) {
+async function loadPartnerComparison(userId, weekStartStr, weekEndStr, myWeeklyPct) {
     // Buscar compañero activo
     const { data: partnership } = await supabaseClient
         .from('partnerships')
@@ -373,6 +396,7 @@ async function loadPartnerComparison(userId, weekStartStr, weekEndStr, myHabitsC
         .maybeSingle();
 
     const comparisonDiv = document.getElementById('partner-comparison');
+    if (!comparisonDiv) return;
     
     if (!partnership) {
         comparisonDiv.classList.add('hidden');
@@ -391,7 +415,7 @@ async function loadPartnerComparison(userId, weekStartStr, weekEndStr, myHabitsC
     // Obtener hábitos del compañero
     const { data: partnerHabits } = await supabaseClient
         .from('habits')
-        .select('id')
+        .select('id, frequency')
         .eq('user_id', partnerId);
 
     if (!partnerHabits?.length) {
@@ -405,14 +429,27 @@ async function loadPartnerComparison(userId, weekStartStr, weekEndStr, myHabitsC
     // Obtener logs del compañero esta semana
     const { data: partnerLogs } = await supabaseClient
         .from('habit_logs')
-        .select('log_date')
+        .select('habit_id, log_date')
         .in('habit_id', partnerHabits.map(h => h.id))
         .gte('log_date', weekStartStr)
         .lte('log_date', weekEndStr);
 
-    const partnerTotal = partnerLogs?.length || 0;
-    const partnerPossible = partnerHabits.length * 7;
-    const partnerPct = partnerPossible > 0 ? Math.round((partnerTotal / partnerPossible) * 100) : 0;
+    const dailyPartnerHabits = partnerHabits.filter(habit => habit.frequency === 'daily').length;
+    const weeklyPartnerHabits = partnerHabits.filter(habit => habit.frequency === 'weekly');
+    const weeklyPartnerIds = new Set(weeklyPartnerHabits.map(habit => habit.id));
+    const dailyPartnerIds = new Set(partnerHabits.filter(habit => habit.frequency === 'daily').map(habit => habit.id));
+    const completedPartnerWeeklyIds = new Set();
+    let partnerDailyTotal = 0;
+
+    (partnerLogs ?? []).forEach(log => {
+        if (dailyPartnerIds.has(log.habit_id)) partnerDailyTotal++;
+        if (weeklyPartnerIds.has(log.habit_id)) completedPartnerWeeklyIds.add(log.habit_id);
+    });
+
+    const elapsedDays = Math.min(7, Math.round((parseLocalDate(getLocalDateString()) - parseLocalDate(weekStartStr)) / 86400000) + 1);
+    const partnerPossible = (dailyPartnerHabits * elapsedDays) + weeklyPartnerIds.size;
+    const partnerTotal = partnerDailyTotal + completedPartnerWeeklyIds.size;
+    const partnerPct = partnerPossible > 0 ? Math.min(100, Math.round((partnerTotal / partnerPossible) * 100)) : 0;
 
     // Actualizar UI
     document.getElementById('partner-label').textContent = partner?.username || 'Compañero';
@@ -473,12 +510,18 @@ habitsList.addEventListener('click', async event => {
         if (button.dataset.action === 'toggle') {
             await toggleHabit(button.dataset.habitId, button.dataset.frequency, button.dataset.completed === 'true');
         } else if (button.dataset.action === 'edit') {
-            openEditModal(button.dataset.habitId);
+            await openEditModal(button.dataset.habitId);
         } else if (button.dataset.action === 'delete' && confirm('¿Eliminar este hábito y su progreso?')) {
+            const { data: userData, error: authError } = await supabaseClient.auth.getUser();
+            if (authError) throw authError;
+            const user = userData?.user;
+            if (!user) throw new Error('Inicia sesión');
+
             const { error } = await supabaseClient
                 .from('habits')
                 .delete()
-                .eq('id', button.dataset.habitId);
+                .eq('id', button.dataset.habitId)
+                .eq('user_id', user.id);
             if (error) throw error;
             await loadHabits();
         }
@@ -516,11 +559,17 @@ document.addEventListener('keydown', event => {
 let editingHabitId = null;
 
 async function openEditModal(habitId) {
-    // Buscar el hábito en la base de datos
+    // Limitar la carga al propietario del hábito, además de confiar en las políticas RLS.
+    const { data: userData, error: authError } = await supabaseClient.auth.getUser();
+    if (authError) throw authError;
+    const user = userData?.user;
+    if (!user) throw new Error('Inicia sesión');
+
     const { data: habit, error } = await supabaseClient
         .from('habits')
         .select('*')
         .eq('id', habitId)
+        .eq('user_id', user.id)
         .single();
 
     if (error) {
@@ -548,9 +597,11 @@ function closeHabitModal() {
     modalHabit.classList.add('hidden');
     modalHabit.classList.remove('flex');
     editingHabitId = null;
-    // Restaurar título original
+    habitMessage.classList.add('hidden');
+    // Restaurar título original y devolver el foco al elemento de creación.
     document.getElementById('habit-modal-heading').textContent = 'Nuevo hábito';
     document.getElementById('habit-submit-btn').textContent = 'Crear';
+    document.getElementById('btn-add-habit').focus();
 }
 
 // Modificar el handler del formulario para manejar edición
@@ -601,7 +652,6 @@ habitForm.addEventListener('submit', async event => {
         habitForm.reset();
         closeHabitModal();
         await loadHabits();
-        showHabitFormMessage(wasEditing ? '¡Hábito actualizado!' : '¡Hábito creado!', false);
     } catch (error) {
         console.error('Error:', error);
         showHabitFormMessage(error.message || 'No se pudo guardar el hábito.', true);
@@ -615,14 +665,11 @@ async function subscribeToRealtime(userId) {
     habitRealtimeChannel = supabaseClient
         .channel(`habits-${userId}`)
         .on('postgres_changes', { event: '*', schema: 'public', table: 'habits', filter: `user_id=eq.${userId}` }, () => {
+            // loadHabits refresca también el mapa anual y las gráficas semanales.
             loadHabits();
-            loadYearlyHeatmap();
-            loadWeeklyCharts();
         })
         .on('postgres_changes', { event: '*', schema: 'public', table: 'habit_logs' }, () => {
             loadHabits();
-            loadYearlyHeatmap();
-            loadWeeklyCharts();
         })
         .subscribe();
 }
