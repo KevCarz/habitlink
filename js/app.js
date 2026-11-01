@@ -102,10 +102,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     const themeColor = document.querySelector('meta[name="theme-color"]');
 
     function updateThemeControl(isDark) {
-        themeToggle.querySelector('[data-theme-icon]').textContent = isDark ? '☀️' : '🌙';
-        themeToggle.querySelector('[data-theme-label]').textContent = isDark ? 'Modo día' : 'Modo noche';
+        const thumb = themeToggle.querySelector('[data-theme-thumb]');
+        const icon = themeToggle.querySelector('[data-theme-icon]');
+
+        // El pulgar se desplaza y el icono indica visualmente el modo activo.
+        thumb.classList.toggle('translate-x-6', isDark);
+        icon.textContent = isDark ? '☀️' : '🌙';
+        themeToggle.classList.toggle('bg-indigo-500', isDark);
+        themeToggle.classList.toggle('bg-gray-300', !isDark);
         themeToggle.setAttribute('aria-label', isDark ? 'Activar modo diurno' : 'Activar modo nocturno');
-        themeToggle.setAttribute('aria-pressed', String(isDark));
+        themeToggle.setAttribute('aria-checked', String(isDark));
         themeToggle.title = isDark ? 'Activar modo diurno' : 'Activar modo nocturno';
         themeColor?.setAttribute('content', isDark ? '#111827' : '#f9fafb');
     }

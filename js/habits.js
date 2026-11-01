@@ -31,6 +31,7 @@ function showHabitFormMessage(message, isError = false) {
 
 async function loadHabits() {
     if (!supabaseClient) return;
+    if (!habitsList || !emptyState || !dailySummary || !weeklySummary) return;
 
     const { data: userData, error: authError } = await supabaseClient.auth.getUser();
     if (authError) {
@@ -39,7 +40,13 @@ async function loadHabits() {
         return;
     }
     const user = userData?.user;
-    if (!user) return;
+    if (!user) {
+        habitsList.replaceChildren();
+        emptyState.classList.remove('hidden');
+        dailySummary.textContent = '0 de 0 hábitos diarios completados hoy';
+        weeklySummary.textContent = '0 de 0 hábitos semanales completados';
+        return;
+    }
 
     const { data: habits, error } = await supabaseClient
         .from('habits')
@@ -65,6 +72,7 @@ async function loadHabits() {
         dailySummary.textContent = '0 de 0 hábitos diarios completados hoy';
         weeklySummary.textContent = '0 de 0 hábitos semanales completados';
         emptyState.classList.remove('hidden');
+        await loadYearlyHeatmap();
         return;
     }
 
@@ -153,12 +161,20 @@ async function loadHabits() {
             </div>`;
         habitsList.appendChild(card);
     }
+
+    // Mantener sincronizadas la lista y la actividad anual tras cada cambio.
+    await loadYearlyHeatmap();
 }
 
 async function loadYearlyHeatmap() {
     if (!supabaseClient) return;
 
-    const { data: { user } } = await supabaseClient.auth.getUser();
+    const { data: userData, error: authError } = await supabaseClient.auth.getUser();
+    if (authError) {
+        console.error('Error obteniendo el usuario para el heatmap:', authError);
+        return;
+    }
+    const user = userData?.user;
     if (!user) return;
 
     // Calcular rango de fechas (últimos 365 días)
@@ -175,8 +191,9 @@ async function loadYearlyHeatmap() {
         .eq('user_id', user.id);
 
     if (habitsError || !habits?.length) {
-        document.getElementById('yearly-heatmap').innerHTML = 
+        document.getElementById('yearly-heatmap').innerHTML =
             '<p class="text-center text-sm text-gray-400 py-4">Aún no hay actividad</p>';
+        document.getElementById('yearly-total').textContent = '0 hábitos completados';
         return;
     }
 
@@ -196,7 +213,7 @@ async function loadYearlyHeatmap() {
     // Contar hábitos completados por día
     const countsByDate = {};
     let totalCompleted = 0;
-    logs.forEach(log => {
+    (logs ?? []).forEach(log => {
         countsByDate[log.log_date] = (countsByDate[log.log_date] || 0) + 1;
         totalCompleted++;
     });
@@ -315,55 +332,26 @@ habitsList.addEventListener('click', async event => {
     }
 });
 
-habitForm.addEventListener('submit', async event => {
-    event.preventDefault();
-    const title = document.getElementById('habit-title').value.trim();
-    const description = document.getElementById('habit-description').value.trim();
-    const frequency = document.getElementById('habit-frequency').value;
-
-    if (!title) return;
-
-    habitSubmitBtn.disabled = true;
-    showHabitFormMessage('Creando hábito...');
-    try {
-        const { data: userData, error: userError } = await supabaseClient.auth.getUser();
-        if (userError) throw userError;
-        const user = userData?.user;
-        if (!user) throw new Error('Inicia sesión');
-
-        const { error } = await supabaseClient
-            .from('habits')
-            .insert({ user_id: user.id, title, description, frequency, streak_count: 0 });
-        
-        if (error) throw error;
-
-        habitForm.reset();
-        modalHabit.classList.add('hidden');
-        await loadHabits();
-    } catch (error) {
-        console.error('Error:', error);
-        showHabitFormMessage(error.message, true);
-    } finally {
-        habitSubmitBtn.disabled = false;
-    }
-});
-
 document.getElementById('btn-add-habit').addEventListener('click', () => {
+    editingHabitId = null;
     habitForm.reset();
     habitMessage.classList.add('hidden');
+    document.getElementById('habit-modal-heading').textContent = 'Nuevo hábito';
+    habitSubmitBtn.textContent = 'Crear';
     modalHabit.classList.remove('hidden');
     modalHabit.classList.add('flex');
     document.getElementById('habit-title').focus();
 });
 
-function closeHabitModal() {
-    modalHabit.classList.add('hidden');
-    modalHabit.classList.remove('flex');
-}
-
 document.getElementById('btn-cancel-habit').addEventListener('click', closeHabitModal);
 modalHabit.addEventListener('click', event => {
     if (event.target === modalHabit) closeHabitModal();
+});
+
+document.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && !modalHabit.classList.contains('hidden')) {
+        closeHabitModal();
+    }
 });
 
 // Variable para saber si estamos editando o creando
@@ -379,6 +367,7 @@ async function openEditModal(habitId) {
 
     if (error) {
         console.error('Error cargando hábito:', error);
+        showHabitError('No se pudo cargar el hábito para editarlo.');
         return;
     }
 
@@ -413,19 +402,29 @@ habitForm.addEventListener('submit', async event => {
     const description = document.getElementById('habit-description').value.trim();
     const frequency = document.getElementById('habit-frequency').value;
 
-    if (!title) return;
+    if (!title) {
+        showHabitFormMessage('Escribe un título para el hábito.', true);
+        document.getElementById('habit-title').focus();
+        return;
+    }
 
+    if (!['daily', 'weekly'].includes(frequency)) {
+        showHabitFormMessage('Selecciona una frecuencia válida.', true);
+        return;
+    }
+
+    const wasEditing = editingHabitId !== null;
     habitSubmitBtn.disabled = true;
-    showHabitFormMessage(editingHabitId ? 'Actualizando...' : 'Creando hábito...');
+    showHabitFormMessage(wasEditing ? 'Actualizando...' : 'Creando hábito...');
     
     try {
-        const { data: { user } } = await supabaseClient.auth.getUser();
+        const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
+        if (authError) throw authError;
         if (!user) throw new Error('Inicia sesión');
 
         let error;
         
-        if (editingHabitId) {
-            // MODO EDICIÓN
+        if (wasEditing) {
             const result = await supabaseClient
                 .from('habits')
                 .update({ title, description, frequency })
@@ -433,7 +432,6 @@ habitForm.addEventListener('submit', async event => {
                 .eq('user_id', user.id);
             error = result.error;
         } else {
-            // MODO CREACIÓN
             const result = await supabaseClient
                 .from('habits')
                 .insert({ user_id: user.id, title, description, frequency, streak_count: 0 });
@@ -445,7 +443,7 @@ habitForm.addEventListener('submit', async event => {
         habitForm.reset();
         closeHabitModal();
         await loadHabits();
-        showHabitFormMessage(editingHabitId ? '¡Hábito actualizado!' : '¡Hábito creado!', false);
+        showHabitFormMessage(wasEditing ? '¡Hábito actualizado!' : '¡Hábito creado!', false);
     } catch (error) {
         console.error('Error:', error);
         showHabitFormMessage(error.message || 'No se pudo guardar el hábito.', true);
@@ -460,11 +458,9 @@ async function subscribeToRealtime(userId) {
         .channel(`habits-${userId}`)
         .on('postgres_changes', { event: '*', schema: 'public', table: 'habits', filter: `user_id=eq.${userId}` }, () => {
             loadHabits();
-            loadYearlyHeatmap();
         })
         .on('postgres_changes', { event: '*', schema: 'public', table: 'habit_logs' }, () => {
             loadHabits();
-            loadYearlyHeatmap();
         })
         .subscribe();
 }

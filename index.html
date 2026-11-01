@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="HabitLink permite crear, seguir y compartir hábitos diarios y semanales.">
+    <meta name="color-scheme" content="light dark">
     <title>HabitLink</title>
     <script>
     const savedTheme = localStorage.getItem('theme');
@@ -27,6 +29,9 @@
 <meta name="theme-color" content="#f9fafb">
 </head>
 <body class="h-full bg-gray-50 text-gray-900 transition-colors dark:bg-gray-900 dark:text-gray-100">
+    <noscript>
+        <p class="m-4 rounded-md bg-red-50 p-4 text-sm text-red-700 dark:bg-red-950 dark:text-red-200">HabitLink necesita JavaScript para funcionar.</p>
+    </noscript>
     <div id="app-container" class="flex h-full flex-col">
         <p id="app-error" class="mx-auto mt-6 hidden max-w-2xl rounded-md bg-red-50 p-4 text-sm text-red-700 dark:bg-red-950 dark:text-red-200" role="alert"></p>
         <section id="view-auth" class="hidden flex flex-1 items-center justify-center p-4">
@@ -63,19 +68,21 @@
                     <p class="text-sm text-gray-500 dark:text-gray-300" id="user-greeting">Cargando...</p>
                 </div>
                 <div class="flex flex-wrap items-center gap-2 sm:gap-3">
-                    <button id="btn-add-habit" type="button" class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700">+ Nuevo hábito</button>
-                    <button id="btn-theme-toggle" type="button" aria-label="Activar modo nocturno" aria-pressed="false" title="Activar modo nocturno" class="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600 dark:focus:ring-offset-gray-800">
-                        <span data-theme-icon aria-hidden="true">🌙</span>
-                        <span data-theme-label>Modo noche</span>
+                    <button id="btn-add-habit" type="button" class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800">+ Nuevo hábito</button>
+                    <!-- Interruptor de tema: su estado visual se sincroniza desde js/app.js. -->
+                    <button id="btn-theme-toggle" type="button" role="switch" aria-label="Activar modo nocturno" aria-checked="false" title="Activar modo nocturno" class="relative h-8 w-14 shrink-0 rounded-full bg-gray-300 shadow-inner transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800">
+                        <span data-theme-thumb class="absolute left-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-white text-xs shadow transition-transform duration-200" aria-hidden="true">
+                            <span data-theme-icon>🌙</span>
+                        </span>
                     </button>
-                    <button id="btn-logout" type="button" class="rounded-md bg-gray-200 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600">Salir</button>
+                    <button id="btn-logout" type="button" class="rounded-md bg-gray-200 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 dark:focus:ring-offset-gray-800">Salir</button>
                 </div>
             </header>
             <main class="grid flex-1 grid-cols-1 gap-6 overflow-y-auto p-6 lg:grid-cols-3">
                 <section class="lg:col-span-2" aria-labelledby="habits-heading">
                     <h2 id="habits-heading" class="mb-4 text-lg font-semibold text-gray-700 dark:text-gray-200">Mis hábitos</h2>
-                    <!-- Calendario Anual tipo GitHub -->
-<div id="yearly-heatmap-container" class="mb-6 rounded-lg bg-white p-5 shadow dark:bg-gray-800">
+                    <!-- Calendario anual: muestra la actividad de los últimos 365 días. -->
+<div id="yearly-heatmap-container" class="mb-6 rounded-lg bg-white p-5 shadow dark:bg-gray-800" aria-label="Actividad anual">
     <div class="mb-3 flex items-center justify-between">
         <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-200">Actividad del último año</h3>
         <span id="yearly-total" class="text-xs text-gray-500 dark:text-gray-400">0 hábitos completados</span>
@@ -119,8 +126,8 @@
                         <h2 id="partner-progress-heading" class="mb-4 text-lg font-semibold text-gray-700 dark:text-gray-200">Progreso de mis compañeros</h2>
                         <div id="partner-habits" class="space-y-4"></div>
                     </section>
-                    <section id="requests-section" class="hidden rounded-lg bg-white p-5 shadow dark:bg-gray-800">
-                        <h2 class="mb-4 text-lg font-semibold text-gray-700 dark:text-gray-200">Solicitudes de compañeros</h2>
+                    <section id="requests-section" class="hidden rounded-lg bg-white p-5 shadow dark:bg-gray-800" aria-labelledby="requests-heading">
+                        <h2 id="requests-heading" class="mb-4 text-lg font-semibold text-gray-700 dark:text-gray-200">Solicitudes de compañeros</h2>
                         <div id="requests-list" class="space-y-3"></div>
                     </section>
                 </aside>
