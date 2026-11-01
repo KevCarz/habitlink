@@ -3,16 +3,40 @@ async function loadStats() {
     const { data: { user } } = await supabaseClient.auth.getUser();
     if (!user) return;
 
-    // 1. Obtener todos los hábitos y logs del usuario
-    const { data: habits } = await supabaseClient.from('habits').select('*').eq('user_id', user.id);
+    const resetStats = () => {
+        document.getElementById('stat-total').textContent = '0';
+        document.getElementById('stat-longest-streak').textContent = '0 días';
+        document.getElementById('stat-best-day').textContent = '-';
+        document.getElementById('stat-best-habit').textContent = '-';
+        document.getElementById('monthly-chart').replaceChildren();
+        document.getElementById('monthly-labels').replaceChildren();
+    };
+
+    const parseLocalDate = (value) => {
+        const [year, month, day] = String(value).slice(0, 10).split('-').map(Number);
+        return new Date(year, month - 1, day);
+    };
+
+    resetStats();
+
+    // Obtener hábitos y registros pertenecientes al usuario actual.
+    const { data: habits, error: habitsError } = await supabaseClient.from('habits').select('*').eq('user_id', user.id);
+    if (habitsError) {
+        console.error('No se pudieron cargar las estadísticas de hábitos:', habitsError);
+        return;
+    }
     if (!habits || habits.length === 0) return;
 
     const habitIds = habits.map(h => h.id);
-    const { data: logs } = await supabaseClient
+    const { data: logs, error: logsError } = await supabaseClient
         .from('habit_logs')
         .select('habit_id, log_date')
         .in('habit_id', habitIds);
 
+    if (logsError) {
+        console.error('No se pudieron cargar los registros de hábitos:', logsError);
+        return;
+    }
     if (!logs) return;
 
     // --- CÁLCULO 1: Total Completados ---
@@ -21,13 +45,13 @@ async function loadStats() {
     // --- CÁLCULO 2: Racha Más Larga (Global) ---
     let maxStreak = 0;
     habits.forEach(habit => {
-        const habitLogs = logs.filter(l => l.habit_id === habit.id).map(l => l.log_date).sort();
+        const habitLogs = [...new Set(logs.filter(l => l.habit_id === habit.id).map(l => l.log_date))].sort();
         let currentStreak = 1;
         for (let i = 1; i < habitLogs.length; i++) {
-            const prev = new Date(habitLogs[i-1]);
-            const curr = new Date(habitLogs[i]);
+            const prev = parseLocalDate(habitLogs[i-1]);
+            const curr = parseLocalDate(habitLogs[i]);
             const diffTime = Math.abs(curr - prev);
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
             
             if (diffDays === 1) {
                 currentStreak++;
@@ -45,7 +69,7 @@ async function loadStats() {
     const dayCounts = [0, 0, 0, 0, 0, 0, 0]; // Dom, Lun, Mar...
     const dayNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
     logs.forEach(log => {
-        const day = new Date(log.log_date).getDay();
+        const day = parseLocalDate(log.log_date).getDay();
         dayCounts[day]++;
     });
     const bestDayIndex = dayCounts.indexOf(Math.max(...dayCounts));
@@ -75,7 +99,7 @@ async function loadStats() {
     }
 
     logs.forEach(log => {
-        const d = new Date(log.log_date);
+        const d = parseLocalDate(log.log_date);
         const key = `${d.getFullYear()}-${d.getMonth()}`;
         if (months[key] !== undefined) months[key].count++;
     });

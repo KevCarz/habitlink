@@ -63,21 +63,17 @@
         </section>
 
         <section id="view-dashboard" class="hidden flex flex-1 flex-col bg-gray-50 dark:bg-gray-900">
+            <!-- Cabecera del dashboard: contiene la navegación y las acciones principales. -->
             <header class="flex flex-wrap items-center justify-between gap-4 bg-white px-6 py-4 shadow-sm dark:bg-gray-800">
-                <div>
-                    <div class="flex flex-col sm:flex-row sm:items-center gap-4">
-    <div>
-        <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">HabitLink</h1>
-        <p class="text-sm text-gray-500 dark:text-gray-300" id="user-greeting">Cargando...</p>
-    </div>
-    <!-- Navegación -->
-    <div class="flex bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
-        <button id="nav-dashboard" class="px-4 py-1.5 rounded-md text-sm font-medium bg-white dark:bg-gray-600 text-gray-800 dark:text-white shadow-sm transition-all">Dashboard</button>
-        <button id="nav-stats" class="px-4 py-1.5 rounded-md text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-all">Estadísticas</button>
-    </div>
-</div>
-                    <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Mis hábitos</h1>
-                    <p class="text-sm text-gray-500 dark:text-gray-300" id="user-greeting">Cargando...</p>
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-5">
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">HabitLink</h1>
+                        <p class="text-sm text-gray-500 dark:text-gray-300" id="user-greeting">Cargando...</p>
+                    </div>
+                    <nav class="flex rounded-lg bg-gray-100 p-1 dark:bg-gray-700" aria-label="Secciones principales">
+                        <button id="nav-dashboard" type="button" aria-current="page" class="rounded-md bg-white px-4 py-1.5 text-sm font-medium text-gray-800 shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-600 dark:text-white">Dashboard</button>
+                        <button id="nav-stats" type="button" class="rounded-md px-4 py-1.5 text-sm font-medium text-gray-500 transition-all hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-gray-400 dark:hover:text-gray-200">Estadísticas</button>
+                    </nav>
                 </div>
                 <div class="flex flex-wrap items-center gap-2 sm:gap-3">
                     <button id="btn-add-habit" type="button" class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800">+ Nuevo hábito</button>
@@ -173,9 +169,16 @@
         </section>
 
         <!-- VISTA DE ESTADÍSTICAS -->
-<section id="view-stats" class="hidden flex-1 flex-col bg-gray-50 dark:bg-gray-900 overflow-y-auto">
+<section id="view-stats" class="hidden flex-1 flex-col bg-gray-50 dark:bg-gray-900 overflow-y-auto" aria-labelledby="stats-title">
+    <header class="flex flex-wrap items-center justify-between gap-3 border-b border-gray-200 bg-white px-6 py-4 dark:border-gray-700 dark:bg-gray-800">
+        <h2 id="stats-title" tabindex="-1" class="text-xl font-bold text-gray-800 dark:text-gray-100 outline-none">Tus Estadísticas Globales</h2>
+        <nav aria-label="Navegación de estadísticas">
+            <button id="stats-back-dashboard" type="button" class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700">
+                ← Volver al Dashboard
+            </button>
+        </nav>
+    </header>
     <div class="max-w-4xl mx-auto w-full p-6 space-y-6">
-        <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100">Tus Estadísticas Globales</h2>
         
         <!-- Tarjetas de Resumen -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">

@@ -118,33 +118,43 @@ const viewDashboard = document.getElementById('view-dashboard');
 const viewStats = document.getElementById('view-stats');
 
 function switchView(target) {
-    if (target === 'dashboard') {
-        viewDashboard.classList.remove('hidden');
-        viewDashboard.classList.add('flex'); // Porque es flex-col
-        viewStats.classList.add('hidden');
-        viewStats.classList.remove('flex');
-        
-        navDashboard.classList.add('bg-white', 'dark:bg-gray-600', 'text-gray-800', 'dark:text-white', 'shadow-sm');
-        navDashboard.classList.remove('text-gray-500', 'dark:text-gray-400');
-        navStats.classList.remove('bg-white', 'dark:bg-gray-600', 'text-gray-800', 'dark:text-white', 'shadow-sm');
-        navStats.classList.add('text-gray-500', 'dark:text-gray-400');
+    const showingDashboard = target === 'dashboard';
+
+    viewDashboard.classList.toggle('hidden', !showingDashboard);
+    viewDashboard.classList.toggle('flex', showingDashboard);
+    viewStats.classList.toggle('hidden', showingDashboard);
+    viewStats.classList.toggle('flex', !showingDashboard);
+
+    navDashboard.classList.toggle('bg-white', showingDashboard);
+    navDashboard.classList.toggle('dark:bg-gray-600', showingDashboard);
+    navDashboard.classList.toggle('text-gray-800', showingDashboard);
+    navDashboard.classList.toggle('dark:text-white', showingDashboard);
+    navDashboard.classList.toggle('shadow-sm', showingDashboard);
+    navDashboard.classList.toggle('text-gray-500', !showingDashboard);
+    navDashboard.classList.toggle('dark:text-gray-400', !showingDashboard);
+
+    navStats.classList.toggle('bg-white', !showingDashboard);
+    navStats.classList.toggle('dark:bg-gray-600', !showingDashboard);
+    navStats.classList.toggle('text-gray-800', !showingDashboard);
+    navStats.classList.toggle('dark:text-white', !showingDashboard);
+    navStats.classList.toggle('shadow-sm', !showingDashboard);
+    navStats.classList.toggle('text-gray-500', showingDashboard);
+    navStats.classList.toggle('dark:text-gray-400', showingDashboard);
+
+    navDashboard.setAttribute('aria-current', showingDashboard ? 'page' : 'false');
+    navStats.setAttribute('aria-current', showingDashboard ? 'false' : 'page');
+
+    if (!showingDashboard) {
+        loadStats();
+        document.getElementById('stats-title')?.focus();
     } else {
-        viewDashboard.classList.add('hidden');
-        viewDashboard.classList.remove('flex');
-        viewStats.classList.remove('hidden');
-        viewStats.classList.add('flex');
-        
-        navStats.classList.add('bg-white', 'dark:bg-gray-600', 'text-gray-800', 'dark:text-white', 'shadow-sm');
-        navStats.classList.remove('text-gray-500', 'dark:text-gray-400');
-        navDashboard.classList.remove('bg-white', 'dark:bg-gray-600', 'text-gray-800', 'dark:text-white', 'shadow-sm');
-        navDashboard.classList.add('text-gray-500', 'dark:text-gray-400');
-        
-        loadStats(); // Cargar datos al entrar
+        navDashboard?.focus();
     }
 }
 
 if (navDashboard) navDashboard.addEventListener('click', () => switchView('dashboard'));
 if (navStats) navStats.addEventListener('click', () => switchView('stats'));
+document.getElementById('stats-back-dashboard')?.addEventListener('click', () => switchView('dashboard'));
     const themeToggle = document.getElementById('btn-theme-toggle');
     const themeColor = document.querySelector('meta[name="theme-color"]');
 
