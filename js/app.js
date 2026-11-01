@@ -37,8 +37,17 @@ function clearAppError() {
 
 function showView(viewId) {
     document.getElementById('view-auth').classList.add('hidden');
+    document.getElementById('view-auth').classList.remove('flex');
+    
     document.getElementById('view-dashboard').classList.add('hidden');
-    document.getElementById(viewId).classList.remove('hidden');
+    document.getElementById('view-dashboard').classList.remove('flex');
+    
+    document.getElementById('view-stats').classList.add('hidden');
+    document.getElementById('view-stats').classList.remove('flex');
+
+    const target = document.getElementById(viewId);
+    target.classList.remove('hidden');
+    if (viewId !== 'view-auth') target.classList.add('flex'); // Dashboard y Stats son flex
 }
 
 async function loadUserProfile(userId) {
@@ -102,6 +111,40 @@ async function handleSignedOut() {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
+    // --- NAVEGACIÓN DASHBOARD / ESTADÍSTICAS ---
+const navDashboard = document.getElementById('nav-dashboard');
+const navStats = document.getElementById('nav-stats');
+const viewDashboard = document.getElementById('view-dashboard');
+const viewStats = document.getElementById('view-stats');
+
+function switchView(target) {
+    if (target === 'dashboard') {
+        viewDashboard.classList.remove('hidden');
+        viewDashboard.classList.add('flex'); // Porque es flex-col
+        viewStats.classList.add('hidden');
+        viewStats.classList.remove('flex');
+        
+        navDashboard.classList.add('bg-white', 'dark:bg-gray-600', 'text-gray-800', 'dark:text-white', 'shadow-sm');
+        navDashboard.classList.remove('text-gray-500', 'dark:text-gray-400');
+        navStats.classList.remove('bg-white', 'dark:bg-gray-600', 'text-gray-800', 'dark:text-white', 'shadow-sm');
+        navStats.classList.add('text-gray-500', 'dark:text-gray-400');
+    } else {
+        viewDashboard.classList.add('hidden');
+        viewDashboard.classList.remove('flex');
+        viewStats.classList.remove('hidden');
+        viewStats.classList.add('flex');
+        
+        navStats.classList.add('bg-white', 'dark:bg-gray-600', 'text-gray-800', 'dark:text-white', 'shadow-sm');
+        navStats.classList.remove('text-gray-500', 'dark:text-gray-400');
+        navDashboard.classList.remove('bg-white', 'dark:bg-gray-600', 'text-gray-800', 'dark:text-white', 'shadow-sm');
+        navDashboard.classList.add('text-gray-500', 'dark:text-gray-400');
+        
+        loadStats(); // Cargar datos al entrar
+    }
+}
+
+if (navDashboard) navDashboard.addEventListener('click', () => switchView('dashboard'));
+if (navStats) navStats.addEventListener('click', () => switchView('stats'));
     const themeToggle = document.getElementById('btn-theme-toggle');
     const themeColor = document.querySelector('meta[name="theme-color"]');
 
