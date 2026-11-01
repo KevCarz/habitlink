@@ -275,6 +275,164 @@ async function loadYearlyHeatmap() {
     heatmapContainer.appendChild(grid);
 }
 
+async function loadWeeklyCharts() {
+    if (!supabaseClient) return;
+
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    if (!user) return;
+
+    // Calcular inicio y fin de la semana actual (lunes a domingo)
+    const today = new Date();
+    const dayOfWeek = today.getDay(); // 0=Dom, 1=Lun...
+    const mondayOffset = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+    
+    const weekStart = new Date(today);
+    weekStart.setDate(today.getDate() - mondayOffset);
+    weekStart.setHours(0, 0, 0, 0);
+    
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekStart.getDate() + 6);
+    weekEnd.setHours(23, 59, 59, 999);
+
+    const weekStartStr = getLocalDateString(weekStart);
+    const weekEndStr = getLocalDateString(weekEnd);
+
+    // Obtener hábitos del usuario
+    const { data: myHabits, error: habitsError } = await supabaseClient
+        .from('habits')
+        .select('id')
+        .eq('user_id', user.id);
+
+    if (habitsError || !myHabits?.length) {
+        document.getElementById('weekly-bars').innerHTML = 
+            '<p class="text-center text-sm text-gray-400 py-4">Aún no hay hábitos</p>';
+        return;
+    }
+
+    // Obtener logs de esta semana
+    const { data: myLogs, error: logsError } = await supabaseClient
+        .from('habit_logs')
+        .select('log_date')
+        .in('habit_id', myHabits.map(h => h.id))
+        .gte('log_date', weekStartStr)
+        .lte('log_date', weekEndStr);
+
+    if (logsError) {
+        console.error('Error cargando gráficas semanales:', logsError);
+        return;
+    }
+
+    // Calcular cumplimiento por día
+    const daysOfWeek = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+    const daysCompleted = [0, 0, 0, 0, 0, 0, 0];
+    const totalPerDay = myHabits.length;
+
+    myLogs.forEach(log => {
+        const logDate = new Date(log.log_date);
+        let dayIndex = logDate.getDay() - 1; // 0=Lunes
+        if (dayIndex < 0) dayIndex = 6; // Domingo
+        daysCompleted[dayIndex]++;
+    });
+
+    // Calcular porcentaje total de la semana
+    const totalPossible = totalPerDay * 7;
+    const totalCompleted = daysCompleted.reduce((a, b) => a + b, 0);
+    const weeklyPct = totalPossible > 0 ? Math.round((totalCompleted / totalPossible) * 100) : 0;
+    document.getElementById('weekly-percentage').textContent = `${weeklyPct}%`;
+
+    // Renderizar barras por día
+    const barsContainer = document.getElementById('weekly-bars');
+    barsContainer.innerHTML = daysOfWeek.map((day, index) => {
+        const completed = daysCompleted[index];
+        const pct = totalPerDay > 0 ? Math.round((completed / totalPerDay) * 100) : 0;
+        const isToday = index === (dayOfWeek === 0 ? 6 : dayOfWeek - 1);
+        
+        return `
+            <div class="flex items-center gap-3">
+                <span class="w-20 text-xs font-medium ${isToday ? 'text-indigo-600 dark:text-indigo-400 font-bold' : 'text-gray-600 dark:text-gray-400'}">${day}</span>
+                <div class="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                    <div class="h-full ${pct === 100 ? 'bg-green-500' : pct >= 50 ? 'bg-indigo-500' : 'bg-gray-400'} rounded-full transition-all duration-500" style="width: ${pct}%"></div>
+                </div>
+                <span class="w-10 text-right text-xs font-semibold text-gray-700 dark:text-gray-300">${pct}%</span>
+            </div>
+        `;
+    }).join('');
+
+    // Cargar comparativa con compañero
+    await loadPartnerComparison(user.id, weekStartStr, weekEndStr, totalPerDay, weeklyPct);
+}
+
+async function loadPartnerComparison(userId, weekStartStr, weekEndStr, myHabitsCount, myWeeklyPct) {
+    // Buscar compañero activo
+    const { data: partnership } = await supabaseClient
+        .from('partnerships')
+        .select('user_1, user_2')
+        .eq('status', 'active')
+        .or(`user_1.eq.${userId},user_2.eq.${userId}`)
+        .limit(1)
+        .maybeSingle();
+
+    const comparisonDiv = document.getElementById('partner-comparison');
+    
+    if (!partnership) {
+        comparisonDiv.classList.add('hidden');
+        return;
+    }
+
+    const partnerId = partnership.user_1 === userId ? partnership.user_2 : partnership.user_1;
+
+    // Obtener nombre del compañero
+    const { data: partner } = await supabaseClient
+        .from('profiles')
+        .select('username')
+        .eq('id', partnerId)
+        .single();
+
+    // Obtener hábitos del compañero
+    const { data: partnerHabits } = await supabaseClient
+        .from('habits')
+        .select('id')
+        .eq('user_id', partnerId);
+
+    if (!partnerHabits?.length) {
+        document.getElementById('partner-label').textContent = partner?.username || 'Compañero';
+        document.getElementById('partner-weekly-pct').textContent = '0%';
+        document.getElementById('comparison-message').textContent = 'Tu compañero aún no tiene hábitos';
+        comparisonDiv.classList.remove('hidden');
+        return;
+    }
+
+    // Obtener logs del compañero esta semana
+    const { data: partnerLogs } = await supabaseClient
+        .from('habit_logs')
+        .select('log_date')
+        .in('habit_id', partnerHabits.map(h => h.id))
+        .gte('log_date', weekStartStr)
+        .lte('log_date', weekEndStr);
+
+    const partnerTotal = partnerLogs?.length || 0;
+    const partnerPossible = partnerHabits.length * 7;
+    const partnerPct = partnerPossible > 0 ? Math.round((partnerTotal / partnerPossible) * 100) : 0;
+
+    // Actualizar UI
+    document.getElementById('partner-label').textContent = partner?.username || 'Compañero';
+    document.getElementById('partner-weekly-pct').textContent = `${partnerPct}%`;
+    
+    // Mensaje comparativo
+    const diff = myWeeklyPct - partnerPct;
+    let message = '';
+    if (diff > 0) {
+        message = `🔥 ¡Vas ${diff}% adelante esta semana!`;
+    } else if (diff < 0) {
+        message = `💪 Tu compañero va ${Math.abs(diff)}% adelante. ¡A recuperar!`;
+    } else {
+        message = `🤝 ¡Empate perfecto esta semana!`;
+    }
+    document.getElementById('comparison-message').textContent = message;
+
+    comparisonDiv.classList.remove('hidden');
+}
+
 async function toggleHabit(habitId, frequency, isCompleted) {
     try {
         const today = getLocalDateString();
@@ -458,9 +616,13 @@ async function subscribeToRealtime(userId) {
         .channel(`habits-${userId}`)
         .on('postgres_changes', { event: '*', schema: 'public', table: 'habits', filter: `user_id=eq.${userId}` }, () => {
             loadHabits();
+            loadYearlyHeatmap();
+            loadWeeklyCharts();
         })
         .on('postgres_changes', { event: '*', schema: 'public', table: 'habit_logs' }, () => {
             loadHabits();
+            loadYearlyHeatmap();
+            loadWeeklyCharts();
         })
         .subscribe();
 }
@@ -475,3 +637,4 @@ async function unsubscribeHabitRealtime() {
 window.subscribeToRealtime = subscribeToRealtime;
 window.unsubscribeHabitRealtime = unsubscribeHabitRealtime;
 window.loadYearlyHeatmap = loadYearlyHeatmap;
+window.loadWeeklyCharts = loadWeeklyCharts;
