@@ -64,8 +64,8 @@
 
         <section id="view-dashboard" class="hidden flex flex-1 flex-col bg-gray-50 dark:bg-gray-900">
             <!-- Cabecera del dashboard: identidad, navegación y acciones quedan en una sola fila adaptable. -->
-            <header class="flex flex-wrap items-center justify-between gap-4 bg-white px-6 py-4 shadow-sm dark:bg-gray-800">
-                <div class="flex min-w-0 flex-1 flex-col gap-3 sm:flex-row sm:items-center sm:gap-5">
+            <header class="grid grid-cols-1 items-center gap-3 bg-white px-4 py-3 shadow-sm dark:bg-gray-800 sm:px-6 sm:py-4 lg:grid-cols-[minmax(0,1fr)_auto]">
+                <div class="flex min-w-0 flex-col gap-3 md:flex-row md:items-center md:gap-5">
                     <div class="flex items-center gap-3">
                         <!-- Espacio reservado para el logo: sustituir el SVG por la imagen definitiva sin cambiar la estructura. -->
                         <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-sm" aria-label="Logo de HabitLink">
@@ -79,13 +79,13 @@
                             <p class="truncate text-sm text-gray-500 dark:text-gray-300" id="user-greeting">Cargando usuario...</p>
                         </div>
                     </div>
-                    <nav class="flex rounded-lg bg-gray-100 p-1 dark:bg-gray-700" aria-label="Secciones principales">
-                        <button id="nav-dashboard" type="button" aria-current="page" class="rounded-md bg-white px-4 py-1.5 text-sm font-medium text-gray-800 shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-600 dark:text-white">Dashboard</button>
-                        <button id="nav-stats" type="button" class="rounded-md px-4 py-1.5 text-sm font-medium text-gray-500 transition-all hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:text-gray-400 dark:hover:text-gray-200">Estadísticas</button>
+                    <nav class="grid grid-cols-2 rounded-lg bg-gray-100 p-1 dark:bg-gray-700 md:flex md:w-auto" aria-label="Secciones principales">
+                        <button id="nav-dashboard" type="button" aria-current="page" class="rounded-md bg-white px-3 py-2 text-sm font-medium text-gray-800 shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:px-4 dark:bg-gray-600 dark:text-white">Dashboard</button>
+                        <button id="nav-stats" type="button" class="rounded-md px-3 py-2 text-sm font-medium text-gray-500 transition-all hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:px-4 dark:text-gray-400 dark:hover:text-gray-200">Estadísticas</button>
                     </nav>
                 </div>
-                <div class="flex flex-wrap items-center gap-2 sm:gap-3">
-                    <button id="btn-add-habit" type="button" class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800">+ Nuevo hábito</button>
+                <div class="grid grid-cols-[1fr_auto_auto] items-center gap-2 sm:flex sm:flex-wrap sm:justify-end sm:gap-3">
+                    <button id="btn-add-habit" type="button" class="min-w-0 rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:px-4 dark:focus:ring-offset-gray-800"><span aria-hidden="true">+</span><span class="ml-1 sm:hidden">Nuevo</span><span class="hidden sm:inline"> Nuevo hábito</span></button>
                     <!-- Interruptor de tema: su estado visual se sincroniza desde js/app.js. -->
                     <button id="btn-theme-toggle" type="button" role="switch" aria-label="Activar modo nocturno" aria-checked="false" title="Activar modo nocturno" class="relative h-8 w-14 shrink-0 rounded-full bg-gray-300 shadow-inner transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800">
                         <span data-theme-thumb class="absolute left-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-white text-xs shadow transition-transform duration-200" aria-hidden="true">
@@ -96,23 +96,26 @@
                 </div>
             </header>
 
-            <!-- El panel de insignias está separado de la cabecera para no alterar la alineación principal. -->
-            <section class="border-b border-yellow-200 bg-gradient-to-r from-yellow-50 to-orange-50 dark:border-yellow-800 dark:from-yellow-900/20 dark:to-orange-900/20" aria-label="Insignias">
-                <div class="mx-auto max-w-7xl px-6 py-3">
-                    <button id="badges-toggle" type="button" aria-expanded="false" aria-controls="badges-panel" class="flex w-full items-center justify-between rounded-md text-left focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                        <span class="flex items-center gap-3">
-                            <span class="text-2xl" aria-hidden="true">🏆</span>
-                            <span>
-                                <span class="block text-sm font-bold text-gray-800 dark:text-gray-100">Mis Insignias</span>
-                                <span class="block text-xs text-gray-500 dark:text-gray-400">
-                                    <span id="badges-unlocked-count">0</span> de <span id="badges-total-count">0</span> desbloqueadas
+            <!-- Tarjeta de insignias separada: conserva una superficie limpia sin competir con el header. -->
+            <section class="border-b border-amber-100 bg-amber-50/60 px-4 py-3 dark:border-amber-900/40 dark:bg-gray-900" aria-label="Insignias">
+                <div class="mx-auto max-w-7xl">
+                    <button id="badges-toggle" type="button" aria-expanded="false" aria-controls="badges-panel" class="flex w-full items-center gap-3 rounded-xl border border-amber-200 bg-white px-3 py-2.5 text-left shadow-sm transition-colors hover:border-amber-300 hover:bg-amber-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-amber-800 dark:bg-gray-800 dark:hover:bg-gray-700 sm:px-4">
+                        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-100 text-xl ring-4 ring-white dark:bg-amber-900/40 dark:ring-gray-800" aria-hidden="true">🏆</span>
+                        <span class="min-w-0 flex-1">
+                            <span class="flex items-baseline justify-between gap-2">
+                                <span class="text-sm font-bold text-gray-800 dark:text-gray-100">Mis Insignias</span>
+                                <span class="shrink-0 text-xs font-semibold text-amber-700 dark:text-amber-400">
+                                    <span id="badges-unlocked-count">0</span>/<span id="badges-total-count">0</span>
                                 </span>
                             </span>
+                            <span id="badges-progress-track" class="mt-2 block h-1.5 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                                <span id="badges-progress-bar" class="block h-full rounded-full bg-amber-500 transition-all duration-300" style="width: 0%"></span>
+                            </span>
                         </span>
-                        <span id="badges-toggle-icon" class="text-gray-500 dark:text-gray-400" aria-hidden="true">▼</span>
+                        <span id="badges-toggle-icon" class="ml-1 shrink-0 text-sm text-gray-500 dark:text-gray-400" aria-hidden="true">▼</span>
                     </button>
 
-                    <div id="badges-panel" class="mt-4 hidden pb-2">
+                    <div id="badges-panel" class="mt-3 hidden rounded-xl border border-amber-100 bg-white p-3 shadow-sm dark:border-gray-700 dark:bg-gray-800 sm:p-4">
                         <div id="badges-container" class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                             <!-- Insignias inyectadas por JS -->
                         </div>
@@ -204,10 +207,10 @@
 
         <!-- VISTA DE ESTADÍSTICAS -->
 <section id="view-stats" class="hidden flex-1 flex-col bg-gray-50 dark:bg-gray-900 overflow-y-auto" aria-labelledby="stats-title">
-    <header class="flex flex-wrap items-center justify-between gap-3 border-b border-gray-200 bg-white px-6 py-4 dark:border-gray-700 dark:bg-gray-800">
+    <header class="flex flex-col gap-3 border-b border-gray-200 bg-white px-4 py-4 dark:border-gray-700 dark:bg-gray-800 sm:flex-row sm:items-center sm:justify-between sm:px-6">
         <h2 id="stats-title" tabindex="-1" class="text-xl font-bold text-gray-800 dark:text-gray-100 outline-none">Tus Estadísticas Globales</h2>
-        <nav aria-label="Navegación de estadísticas">
-            <button id="stats-back-dashboard" type="button" class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700">
+        <nav class="w-full sm:w-auto" aria-label="Navegación de estadísticas">
+            <button id="stats-back-dashboard" type="button" class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:w-auto dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700">
                 ← Volver al Dashboard
             </button>
         </nav>

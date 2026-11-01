@@ -39,26 +39,34 @@ async function loadBadges() {
     document.getElementById('badges-unlocked-count').textContent = unlockedCount;
     document.getElementById('badges-total-count').textContent = totalCount;
 
+    const progress = totalCount > 0 ? Math.round((unlockedCount / totalCount) * 100) : 0;
+    const progressBar = document.getElementById('badges-progress-bar');
+    if (progressBar) {
+        progressBar.style.width = `${progress}%`;
+        progressBar.parentElement?.setAttribute('aria-label', `${unlockedCount} de ${totalCount} insignias desbloqueadas`);
+        progressBar.parentElement?.setAttribute('aria-valuenow', String(progress));
+    }
+
     container.innerHTML = allBadges.map(badge => {
         const isUnlocked = unlockedIds.has(badge.id);
         return `
-            <div class="relative rounded-lg border-2 p-4 transition-all ${
-                isUnlocked 
-                    ? 'border-yellow-400 bg-yellow-50 dark:bg-yellow-900/20 dark:border-yellow-600' 
-                    : 'border-gray-200 bg-gray-50 dark:bg-gray-800 dark:border-gray-700 opacity-60'
+            <article class="relative overflow-hidden rounded-xl border p-3.5 transition-all sm:p-4 ${
+                isUnlocked
+                    ? 'border-amber-300 bg-gradient-to-br from-white to-amber-50 shadow-sm dark:border-amber-700 dark:from-gray-800 dark:to-amber-950/30'
+                    : 'border-gray-200 bg-gray-50/80 dark:border-gray-700 dark:bg-gray-800/60'
             }">
                 <div class="flex items-start gap-3">
-                    <div class="text-3xl ${isUnlocked ? '' : 'grayscale'}">${badge.icon}</div>
-                    <div class="flex-1 min-w-0">
-                        <h4 class="font-bold text-sm text-gray-800 dark:text-gray-100 truncate">${badge.name}</h4>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">${badge.description}</p>
-                        <p class="text-xs mt-1 ${isUnlocked ? 'text-yellow-700 dark:text-yellow-400' : 'text-gray-400'}">
+                    <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white text-2xl shadow-sm ring-1 ring-gray-100 dark:bg-gray-700 dark:ring-gray-600 ${isUnlocked ? '' : 'grayscale opacity-50'}" aria-hidden="true">${badge.icon}</div>
+                    <div class="min-w-0 flex-1">
+                        <h4 class="truncate text-sm font-bold text-gray-800 dark:text-gray-100">${badge.name}</h4>
+                        <p class="mt-1 text-xs leading-relaxed text-gray-500 dark:text-gray-400">${badge.description}</p>
+                        <p class="mt-2 inline-flex rounded-full px-2 py-1 text-xs font-semibold ${isUnlocked ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300' : 'bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-400'}">
                             ${isUnlocked ? '✓ Desbloqueada' : '🔒 ' + badge.requirement}
                         </p>
                     </div>
                 </div>
-                ${isUnlocked ? '<div class="absolute top-2 right-2 text-yellow-500 text-xs font-bold">★</div>' : ''}
-            </div>
+                ${isUnlocked ? '<div class="absolute right-3 top-3 h-2 w-2 rounded-full bg-amber-400 shadow-[0_0_0_4px_rgba(251,191,36,0.15)]" aria-hidden="true"></div>' : ''}
+            </article>
         `;
     }).join('');
 }
