@@ -129,6 +129,7 @@ if (badgesToggle) {
     badgesToggle.addEventListener('click', () => {
         const isHidden = badgesPanel.classList.toggle('hidden');
         badgesToggleIcon.textContent = isHidden ? '▼' : '▲';
+        badgesToggle.setAttribute('aria-expanded', String(!isHidden));
     });
 }
 

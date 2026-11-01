@@ -500,7 +500,7 @@ async function toggleHabit(habitId, frequency, isCompleted) {
         showHabitError(`No se pudo actualizar: ${error.message}`);
     }
     // Verificar insignias después de actualizar
-if (typeof checkAndUnlockBadges === 'function') {
+    if (typeof checkAndUnlockBadges === 'function') {
     checkAndUnlockBadges();
 }
 }
