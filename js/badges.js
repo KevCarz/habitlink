@@ -1,22 +1,82 @@
 // --- SISTEMA DE INSIGNIAS CON TOAST ---
 
+// Copy destacado por logro. Se conserva el contenido de la base de datos como respaldo
+// para insignias nuevas o personalizadas que aún no tengan una presentación definida aquí.
+const BADGE_PRESENTATION = {
+    first_habit: {
+        name: 'Primer Paso',
+        description: '¡Lo lograste! Creaste tu primer hábito y comenzaste a construir una mejor versión de ti.'
+    },
+    habit_collector: {
+        name: 'Coleccionista de Hábitos',
+        description: '¡Gran avance! Alcanzaste 5 hábitos activos y convertiste tu compromiso en una rutina poderosa.'
+    },
+    streak_3: {
+        name: 'Constancia en Acción',
+        description: '¡Imparable! Mantienes una racha de 3 días y ya estás creando un hábito sólido.'
+    },
+    streak_7: {
+        name: 'Racha Imparable',
+        description: '¡Una semana completa! Cumpliste 7 días seguidos: tu disciplina ya está dando resultados.'
+    },
+    streak_30: {
+        name: 'Leyenda de la Constancia',
+        description: '¡Logro extraordinario! Alcanzaste 30 días seguidos y demostraste una disciplina inspiradora.'
+    },
+    first_partner: {
+        name: 'Mejor en Compañía',
+        description: '¡Acompañamiento desbloqueado! Formaste tu primera alianza y puedes crecer junto a alguien más.'
+    },
+    total_50: {
+        name: 'Cincuenta Victorias',
+        description: '¡Increíble marca! Ya registraste 50 logros y cada uno representa una decisión que cuenta.'
+    },
+    total_100: {
+        name: 'Cien Pasos de Éxito',
+        description: '¡Triple dígito alcanzado! Completaste 100 registros y tu constancia habla por sí sola.'
+    },
+    weekly_100: {
+        name: 'Semana Perfecta',
+        description: '¡Semana impecable! Cumpliste todos tus hábitos durante esta semana y superaste el reto al 100%.'
+    }
+};
+
+// Escapa datos obtenidos de Supabase antes de usarlos en HTML para evitar inyección de markup.
+function escapeBadgeHTML(value) {
+    return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
+function getBadgePresentation(badge) {
+    return BADGE_PRESENTATION[badge.code] || {
+        name: badge.name,
+        description: badge.description
+    };
+}
+
 // 1. Función para mostrar el Toast
 function showBadgeToast(badge) {
     const container = document.getElementById('toast-container');
     if (!container) return;
 
-    // Extraer el número de la descripción (si existe) para destacarlo
-    const numberMatch = badge.description.match(/(\d+)/);
-    const hasNumber = numberMatch !== null;
-    
-    // Dividir la descripción en partes para estilizar el número
-    let descriptionHTML = badge.description;
-    if (hasNumber) {
-        const num = numberMatch[1];
-        descriptionHTML = badge.description.replace(num, `<span class="text-3xl font-black text-white drop-shadow-lg">${num}</span>`);
-    }
+    const presentation = getBadgePresentation(badge);
+    const safeName = escapeBadgeHTML(presentation.name);
+    const safeIcon = escapeBadgeHTML(badge.icon || '🏆');
+    const safeDescription = escapeBadgeHTML(presentation.description);
+
+    // Resalta visualmente los números de logros sin insertar texto sin procesar en el HTML.
+    const descriptionHTML = safeDescription.replace(
+        /(\d+)/g,
+        '<span class="text-3xl font-black text-white drop-shadow-lg">$1</span>'
+    );
 
     const toast = document.createElement('div');
+    toast.setAttribute('role', 'status');
+    toast.setAttribute('aria-live', 'polite');
     toast.className = `
         pointer-events-auto transform transition-all duration-500 ease-out translate-x-full opacity-0
         bg-gradient-to-br from-yellow-400 via-orange-500 to-red-500 text-white p-6 rounded-2xl shadow-2xl 
@@ -24,14 +84,14 @@ function showBadgeToast(badge) {
     `;
 
     toast.innerHTML = `
-        <div class="text-6xl animate-bounce drop-shadow-lg flex-shrink-0">${badge.icon}</div>
+        <div class="text-6xl animate-bounce drop-shadow-lg flex-shrink-0">${safeIcon}</div>
         <div class="flex-1 min-w-0">
             <p class="text-[10px] font-bold uppercase tracking-widest text-yellow-100 opacity-80 mb-1">
                 🎉 ¡Insignia Desbloqueada!
             </p>
-            <h4 class="text-2xl font-black leading-tight mb-2 drop-shadow-md">${badge.name}</h4>
+            <h4 class="text-2xl font-black leading-tight mb-2 drop-shadow-md">${safeName}</h4>
             <p class="text-base font-medium text-yellow-50 leading-snug">
-                ${hasNumber ? descriptionHTML : badge.description}
+                ${descriptionHTML}
             </p>
         </div>
     `;
@@ -45,7 +105,7 @@ function showBadgeToast(badge) {
     setTimeout(() => {
         toast.classList.add('translate-x-full', 'opacity-0');
         setTimeout(() => toast.remove(), 500);
-    }, 5000); // 5 segundos para que se aprecie mejor
+    }, 6000); // Se muestra un segundo más para apreciar mejor el logro.
 }
 
 // 2. Cargar insignias (Igual que antes)
@@ -68,6 +128,7 @@ async function loadBadges() {
 
     container.innerHTML = allBadges.map(badge => {
         const isUnlocked = unlockedIds.has(badge.id);
+        const presentation = getBadgePresentation(badge);
         return `
             <div class="relative rounded-lg border-2 p-4 transition-all ${
                 isUnlocked 
@@ -75,12 +136,12 @@ async function loadBadges() {
                     : 'border-gray-200 bg-gray-50 dark:bg-gray-800 dark:border-gray-700 opacity-60 grayscale'
             }">
                 <div class="flex items-start gap-3">
-                    <div class="text-3xl ${isUnlocked ? 'drop-shadow-md' : ''}">${badge.icon}</div>
+                    <div class="text-3xl ${isUnlocked ? 'drop-shadow-md' : ''}">${escapeBadgeHTML(badge.icon || '🏆')}</div>
                     <div class="flex-1 min-w-0">
-                        <h4 class="font-bold text-sm text-gray-800 dark:text-gray-100 truncate">${badge.name}</h4>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">${badge.description}</p>
+                        <h4 class="font-bold text-sm text-gray-800 dark:text-gray-100">${escapeBadgeHTML(presentation.name)}</h4>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">${escapeBadgeHTML(presentation.description)}</p>
                         <p class="text-xs mt-1 ${isUnlocked ? 'text-yellow-700 dark:text-yellow-400 font-semibold' : 'text-gray-400'}">
-                            ${isUnlocked ? '✓ Desbloqueada' : '🔒 ' + badge.requirement}
+                            ${isUnlocked ? '✓ Desbloqueada' : '🔒 ' + escapeBadgeHTML(badge.requirement || 'Sigue adelante para desbloquearla')}
                         </p>
                     </div>
                 </div>
