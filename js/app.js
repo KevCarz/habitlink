@@ -169,28 +169,45 @@ if (navDashboard) navDashboard.addEventListener('click', () => switchView('dashb
 if (navStats) navStats.addEventListener('click', () => switchView('stats'));
 document.getElementById('stats-back-dashboard')?.addEventListener('click', () => switchView('dashboard'));
     const themeToggle = document.getElementById('btn-theme-toggle');
+    const themeToggleMobile = document.getElementById('btn-theme-toggle-mobile');
     const themeColor = document.querySelector('meta[name="theme-color"]');
 
     function updateThemeControl(isDark) {
-        const thumb = themeToggle.querySelector('[data-theme-thumb]');
-        const icon = themeToggle.querySelector('[data-theme-icon]');
-
-        // El pulgar se desplaza y el icono indica visualmente el modo activo.
-        thumb.classList.toggle('translate-x-6', isDark);
-        icon.textContent = isDark ? '☀️' : '🌙';
-        themeToggle.style.backgroundColor = isDark ? '#42695a' : '#cbd4cf';
-        themeToggle.setAttribute('aria-label', isDark ? 'Activar modo diurno' : 'Activar modo nocturno');
-        themeToggle.setAttribute('aria-checked', String(isDark));
-        themeToggle.title = isDark ? 'Activar modo diurno' : 'Activar modo nocturno';
+        // Ambos interruptores representan el mismo estado: uno junto al título en móvil
+        // y otro separado dentro de las acciones del header en escritorio.
+        [
+            {
+                button: themeToggle,
+                thumb: '[data-theme-thumb]',
+                icon: '[data-theme-icon]'
+            },
+            {
+                button: themeToggleMobile,
+                thumb: '[data-theme-thumb-mobile]',
+                icon: '[data-theme-icon-mobile]'
+            }
+        ].forEach(control => {
+            if (!control.button) return;
+            const thumb = control.button.querySelector(control.thumb);
+            const icon = control.button.querySelector(control.icon);
+            thumb?.classList.toggle('translate-x-6', isDark);
+            if (icon) icon.textContent = isDark ? '☀️' : '🌙';
+            control.button.style.backgroundColor = isDark ? '#42695a' : '#cbd4cf';
+            control.button.setAttribute('aria-label', isDark ? 'Activar modo diurno' : 'Activar modo nocturno');
+            control.button.setAttribute('aria-checked', String(isDark));
+            control.button.title = isDark ? 'Activar modo diurno' : 'Activar modo nocturno';
+        });
         themeColor?.setAttribute('content', isDark ? '#111827' : '#f9fafb');
     }
 
     updateThemeControl(document.documentElement.classList.contains('dark'));
-    themeToggle.addEventListener('click', () => {
+    const toggleTheme = () => {
         const isDark = document.documentElement.classList.toggle('dark');
         localStorage.setItem('theme', isDark ? 'dark' : 'light');
         updateThemeControl(isDark);
-    });
+    };
+    themeToggle?.addEventListener('click', toggleTheme);
+    themeToggleMobile?.addEventListener('click', toggleTheme);
 
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('./sw.js')

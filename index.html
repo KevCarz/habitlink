@@ -154,7 +154,8 @@
             <header class="hl-header grid grid-cols-1 items-center gap-3 px-4 py-3 sm:px-6 sm:py-4 lg:grid-cols-[minmax(0,1fr)_auto]">
                 <!-- En móvil se separan identidad, navegación y acciones para evitar que los controles se junten. -->
                 <div class="flex min-w-0 flex-col gap-3 md:flex-row md:items-center md:gap-5">
-                    <div class="flex items-center gap-3">
+                    <!-- La fila superior móvil prioriza el título y coloca el modo nocturno junto a él. -->
+                    <div class="flex w-full items-center gap-3">
                         <!-- Espacio reservado para el logo: sustituir el SVG por la imagen definitiva sin cambiar la estructura. -->
                         <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#42695a] text-white shadow-sm" aria-label="Logo de HabitLink">
                             <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -166,17 +167,24 @@
                             <h1 class="text-xl font-bold leading-tight text-gray-800 dark:text-gray-100">HabitLink</h1>
                             <p class="truncate text-sm text-gray-500 dark:text-gray-300" id="user-greeting">Cargando usuario...</p>
                         </div>
+                        <div class="ml-auto flex h-11 items-center gap-2 rounded-xl border border-[#dde4e0] bg-[#f7f9f8] px-2 dark:border-[#38433e] dark:bg-[#171c1a] sm:hidden">
+                            <button id="btn-theme-toggle-mobile" type="button" role="switch" aria-label="Activar modo nocturno" aria-checked="false" title="Activar modo nocturno" class="relative h-8 w-14 shrink-0 rounded-full bg-[#cbd4cf] shadow-inner transition-colors focus:outline-none focus:ring-2 focus:ring-[#42695a] focus:ring-offset-2 dark:focus:ring-offset-[#171c1a]">
+                                <span data-theme-thumb-mobile class="absolute left-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-white text-xs shadow-md transition-transform duration-200" aria-hidden="true">
+                                    <span data-theme-icon-mobile>🌙</span>
+                                </span>
+                            </button>
+                        </div>
                     </div>
                     <nav class="grid grid-cols-2 rounded-xl border border-[#dde4e0] bg-[#edf1ef] p-1 dark:border-[#38433e] dark:bg-[#171c1a] md:flex md:w-auto" aria-label="Secciones principales">
                         <button id="nav-dashboard" type="button" aria-current="page" class="hl-nav-active min-h-10 rounded-lg px-4 py-2 text-sm font-bold transition-all focus:outline-none focus:ring-2 focus:ring-[#42695a]">Mis hábitos</button>
                         <button id="nav-stats" type="button" class="min-h-10 rounded-lg px-4 py-2 text-sm font-bold text-[#69736f] transition-all hover:text-[#202624] focus:outline-none focus:ring-2 focus:ring-[#42695a] dark:text-[#abb6b0] dark:hover:text-white">Mi progreso</button>
                     </nav>
                 </div>
-                <div class="grid grid-cols-[minmax(0,1fr)_auto_auto_auto] items-center gap-2 sm:flex sm:flex-wrap sm:justify-end sm:gap-3">
+                <div class="grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-2 sm:flex sm:flex-wrap sm:justify-end sm:gap-3">
                     <button id="btn-add-habit" type="button" class="hl-btn-primary min-w-0 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#42695a] focus:ring-offset-2"><span aria-hidden="true">＋</span><span class="ml-1 sm:hidden">Nuevo</span><span class="hidden sm:inline"> Nuevo hábito</span></button>
                     <!-- Interruptor de tema: su estado visual se sincroniza desde js/app.js. -->
                     <!-- Control separado visualmente para que contraste con las acciones principales. -->
-                    <div class="ml-1 flex h-11 items-center gap-2 rounded-xl border border-[#dde4e0] bg-[#f7f9f8] px-2.5 dark:border-[#38433e] dark:bg-[#171c1a] sm:ml-2 sm:px-3">
+                    <div class="hidden h-11 items-center gap-2 rounded-xl border border-[#dde4e0] bg-[#f7f9f8] px-2.5 dark:border-[#38433e] dark:bg-[#171c1a] sm:flex sm:ml-2 sm:px-3">
                         <span class="hidden text-xs font-bold text-[#69736f] dark:text-[#abb6b0] xl:block">Noche</span>
                         <button id="btn-theme-toggle" type="button" role="switch" aria-label="Activar modo nocturno" aria-checked="false" title="Activar modo nocturno" class="relative h-8 w-14 shrink-0 rounded-full bg-[#cbd4cf] shadow-inner transition-colors focus:outline-none focus:ring-2 focus:ring-[#42695a] focus:ring-offset-2 dark:focus:ring-offset-[#171c1a]">
                             <span data-theme-thumb class="absolute left-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-white text-xs shadow-md transition-transform duration-200" aria-hidden="true">
