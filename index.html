@@ -119,29 +119,38 @@
     <noscript>
         <p class="m-4 rounded-md bg-red-50 p-4 text-sm text-red-700 dark:bg-red-950 dark:text-red-200">HabitLink necesita JavaScript para funcionar.</p>
     </noscript>
-    <div id="app-container" class="flex h-full flex-col">
+    <div id="app-container" class="flex min-h-full flex-col">
         <p id="app-error" class="mx-auto mt-6 hidden max-w-2xl rounded-md bg-red-50 p-4 text-sm text-red-700 dark:bg-red-950 dark:text-red-200" role="alert"></p>
-        <section id="view-auth" class="hidden flex flex-1 items-center justify-center p-4">
-            <div class="hl-card w-full max-w-md p-7 sm:p-8">
+        <!-- La vista de acceso usa el alto visible y un contenedor flexible para mantener
+             el formulario realmente centrado también en pantallas pequeñas o con teclado abierto. -->
+        <section id="view-auth" class="hidden flex min-h-[100dvh] flex-1 items-center justify-center overflow-y-auto px-4 py-8 sm:px-6">
+            <div class="hl-card mx-auto w-full max-w-[420px] p-5 sm:max-w-md sm:p-8">
                 <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#42695a] text-2xl text-white shadow-lg">✓</div>
                 <h1 class="mb-2 text-center text-3xl font-black tracking-tight">HabitLink</h1>
                 <p class="mb-7 text-center text-sm text-[#69736f] dark:text-[#abb6b0]">Pequeños pasos, una vida que cambia contigo.</p>
-                <div class="mb-6 flex border-b border-gray-200 dark:border-gray-600" role="tablist" aria-label="Acceso">
-                    <button id="tab-login" type="button" role="tab" aria-selected="true" aria-controls="auth-form" class="flex-1 border-b-2 border-indigo-600 py-2 text-center font-medium text-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500">Iniciar sesión</button>
-                    <button id="tab-register" type="button" role="tab" aria-selected="false" aria-controls="auth-form" class="flex-1 py-2 text-center font-medium text-gray-500 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">Registrarse</button>
+                <!-- Las pestañas mantienen áreas táctiles cómodas sin desbordar en teléfonos estrechos. -->
+                <div class="mb-5 flex border-b border-gray-200 dark:border-gray-600 sm:mb-6" role="tablist" aria-label="Acceso">
+                    <button id="tab-login" type="button" role="tab" aria-selected="true" aria-controls="auth-form" class="min-h-11 flex-1 border-b-2 border-indigo-600 px-2 text-center text-sm font-medium text-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500">Iniciar sesión</button>
+                    <button id="tab-register" type="button" role="tab" aria-selected="false" aria-controls="auth-form" class="min-h-11 flex-1 px-2 text-center text-sm font-medium text-gray-500 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">Registrarse</button>
                 </div>
                 <form id="auth-form" class="space-y-4">
                     <div id="username-field" class="hidden">
                         <label for="username" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Nombre de usuario</label>
                         <input type="text" id="username" minlength="3" maxlength="24" autocomplete="username" class="hl-input mt-1 block w-full px-3 py-2 text-sm" placeholder="tu_usuario">
                     </div>
-                    <div>
+                    <div id="email-field">
                         <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Email</label>
                         <input type="email" id="email" required autocomplete="email" class="hl-input mt-1 block w-full px-3 py-2 text-sm" placeholder="tu@email.com">
                     </div>
                     <div>
                         <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Contraseña</label>
                         <input type="password" id="password" required minlength="6" autocomplete="current-password" class="hl-input mt-1 block w-full px-3 py-2 text-sm" placeholder="Mínimo 6 caracteres">
+                    </div>
+                    <div id="forgot-password-row" class="flex justify-end">
+                        <!-- Enlace discreto y fácil de encontrar, sin competir con el botón principal. -->
+                        <button id="btn-forgot-password" type="button" class="min-h-11 text-sm font-bold text-[#42695a] hover:underline focus:outline-none focus:ring-2 focus:ring-[#42695a] dark:text-[#91b8a7]">
+                            ¿Olvidaste tu contraseña?
+                        </button>
                     </div>
                     <div id="auth-message" class="hidden text-center text-sm" role="status" aria-live="polite"></div>
                     <button type="submit" id="auth-submit-btn" class="hl-btn-primary w-full px-5 focus:outline-none focus:ring-2 focus:ring-[#42695a] focus:ring-offset-2">Entrar</button>
