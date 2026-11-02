@@ -15,16 +15,24 @@ function updateNotificationButton() {
     const btn = document.getElementById('btn-enable-notifications');
     if (!btn) return;
 
+    // El texto completo solo aparece en escritorio; en móvil se conserva el ícono
+    // para evitar que la fila principal del header se vuelva demasiado larga.
     if (notificationPermission === 'granted') {
-        btn.textContent = '🔔 Notificaciones Activas';
+        btn.innerHTML = '<span aria-hidden="true">🔔</span><span class="hidden sm:ml-2 sm:inline">Activadas</span>';
+        btn.setAttribute('aria-label', 'Notificaciones activadas');
+        btn.title = 'Notificaciones activadas';
         btn.classList.add('bg-green-100', 'text-green-700', 'dark:bg-green-900/30', 'dark:text-green-400');
         btn.disabled = true;
     } else if (notificationPermission === 'denied') {
-        btn.textContent = '🔕 Bloqueadas';
+        btn.innerHTML = '<span aria-hidden="true">🔕</span><span class="hidden sm:ml-2 sm:inline">Bloqueadas</span>';
+        btn.setAttribute('aria-label', 'Notificaciones bloqueadas');
+        btn.title = 'Notificaciones bloqueadas';
         btn.classList.add('bg-red-100', 'text-red-700', 'dark:bg-red-900/30', 'dark:text-red-400');
         btn.disabled = true;
     } else {
-        btn.textContent = '🔔 Activar Notificaciones';
+        btn.innerHTML = '<span aria-hidden="true">🔔</span><span class="hidden sm:ml-2 sm:inline">Activar</span>';
+        btn.setAttribute('aria-label', 'Activar notificaciones');
+        btn.title = 'Activar notificaciones';
         btn.classList.remove('bg-green-100', 'text-green-700', 'dark:bg-green-900/30', 'dark:text-green-400', 'bg-red-100', 'text-red-700', 'dark:bg-red-900/30', 'dark:text-red-400');
         btn.disabled = false;
     }

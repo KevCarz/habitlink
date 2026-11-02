@@ -152,6 +152,7 @@
         <section id="view-dashboard" class="hl-shell hidden flex flex-1 flex-col">
             <!-- Cabecera del dashboard: identidad, navegación y acciones quedan en una sola fila adaptable. -->
             <header class="hl-header grid grid-cols-1 items-center gap-3 px-4 py-3 sm:px-6 sm:py-4 lg:grid-cols-[minmax(0,1fr)_auto]">
+                <!-- En móvil se separan identidad, navegación y acciones para evitar que los controles se junten. -->
                 <div class="flex min-w-0 flex-col gap-3 md:flex-row md:items-center md:gap-5">
                     <div class="flex items-center gap-3">
                         <!-- Espacio reservado para el logo: sustituir el SVG por la imagen definitiva sin cambiar la estructura. -->
@@ -171,7 +172,7 @@
                         <button id="nav-stats" type="button" class="min-h-10 rounded-lg px-4 py-2 text-sm font-bold text-[#69736f] transition-all hover:text-[#202624] focus:outline-none focus:ring-2 focus:ring-[#42695a] dark:text-[#abb6b0] dark:hover:text-white">Mi progreso</button>
                     </nav>
                 </div>
-                <div class="flex flex-wrap items-center justify-end gap-2 sm:gap-3">
+                <div class="grid grid-cols-[minmax(0,1fr)_auto_auto_auto] items-center gap-2 sm:flex sm:flex-wrap sm:justify-end sm:gap-3">
                     <button id="btn-add-habit" type="button" class="hl-btn-primary min-w-0 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#42695a] focus:ring-offset-2"><span aria-hidden="true">＋</span><span class="ml-1 sm:hidden">Nuevo</span><span class="hidden sm:inline"> Nuevo hábito</span></button>
                     <!-- Interruptor de tema: su estado visual se sincroniza desde js/app.js. -->
                     <!-- Control separado visualmente para que contraste con las acciones principales. -->
@@ -183,10 +184,14 @@
                             </span>
                         </button>
                     </div>
-                    <button id="btn-enable-notifications" type="button" class="rounded-md bg-gray-100 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 transition-colors">
-    🔔 Activar Notificaciones
-</button>
-                    <button id="btn-logout" type="button" class="hl-btn-secondary px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#42695a]">Salir</button>
+                    <button id="btn-enable-notifications" type="button" title="Activar notificaciones" aria-label="Activar notificaciones" class="hl-btn-secondary flex min-h-11 min-w-11 items-center justify-center px-2 text-sm text-[#69736f] sm:min-w-0 sm:px-4 dark:text-[#abb6b0]">
+                        <span aria-hidden="true">🔔</span>
+                        <span class="hidden sm:ml-2 sm:inline">Activar</span>
+                    </button>
+                    <button id="btn-logout" type="button" aria-label="Cerrar sesión" title="Cerrar sesión" class="hl-btn-secondary flex min-h-11 min-w-11 items-center justify-center px-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#42695a] sm:min-w-0 sm:px-4">
+                        <span aria-hidden="true" class="sm:hidden">↪</span>
+                        <span class="hidden sm:inline">Salir</span>
+                    </button>
                 </div>
             </header>
 
