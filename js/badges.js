@@ -5,36 +5,47 @@ function showBadgeToast(badge) {
     const container = document.getElementById('toast-container');
     if (!container) return;
 
-    // Crear el elemento del toast
+    // Extraer el número de la descripción (si existe) para destacarlo
+    const numberMatch = badge.description.match(/(\d+)/);
+    const hasNumber = numberMatch !== null;
+    
+    // Dividir la descripción en partes para estilizar el número
+    let descriptionHTML = badge.description;
+    if (hasNumber) {
+        const num = numberMatch[1];
+        descriptionHTML = badge.description.replace(num, `<span class="text-3xl font-black text-white drop-shadow-lg">${num}</span>`);
+    }
+
     const toast = document.createElement('div');
-    // Clases para animación de entrada (slide-in) y estilo dorado
     toast.className = `
         pointer-events-auto transform transition-all duration-500 ease-out translate-x-full opacity-0
-        bg-gradient-to-r from-yellow-400 to-orange-500 text-white p-4 rounded-lg shadow-xl 
-        border border-yellow-300 flex items-center gap-4 min-w-[300px] max-w-sm
+        bg-gradient-to-br from-yellow-400 via-orange-500 to-red-500 text-white p-6 rounded-2xl shadow-2xl 
+        border-2 border-yellow-300 flex items-center gap-5 min-w-[380px] max-w-md
     `;
 
     toast.innerHTML = `
-        <div class="text-4xl animate-bounce">${badge.icon}</div>
-        <div class="flex-1">
-            <p class="text-xs font-bold uppercase tracking-wider text-yellow-100">¡Insignia Desbloqueada!</p>
-            <h4 class="text-lg font-bold leading-tight">${badge.name}</h4>
-            <p class="text-xs text-yellow-50 mt-1">${badge.description}</p>
+        <div class="text-6xl animate-bounce drop-shadow-lg flex-shrink-0">${badge.icon}</div>
+        <div class="flex-1 min-w-0">
+            <p class="text-[10px] font-bold uppercase tracking-widest text-yellow-100 opacity-80 mb-1">
+                🎉 ¡Insignia Desbloqueada!
+            </p>
+            <h4 class="text-2xl font-black leading-tight mb-2 drop-shadow-md">${badge.name}</h4>
+            <p class="text-base font-medium text-yellow-50 leading-snug">
+                ${hasNumber ? descriptionHTML : badge.description}
+            </p>
         </div>
     `;
 
     container.appendChild(toast);
 
-    // Forzar reflow para que la animación CSS funcione
     requestAnimationFrame(() => {
         toast.classList.remove('translate-x-full', 'opacity-0');
     });
 
-    // Eliminar después de 4 segundos con animación de salida
     setTimeout(() => {
         toast.classList.add('translate-x-full', 'opacity-0');
-        setTimeout(() => toast.remove(), 500); // Esperar a que termine la transición
-    }, 4000);
+        setTimeout(() => toast.remove(), 500);
+    }, 5000); // 5 segundos para que se aprecie mejor
 }
 
 // 2. Cargar insignias (Igual que antes)
