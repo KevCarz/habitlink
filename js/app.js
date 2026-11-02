@@ -178,8 +178,7 @@ document.getElementById('stats-back-dashboard')?.addEventListener('click', () =>
         // El pulgar se desplaza y el icono indica visualmente el modo activo.
         thumb.classList.toggle('translate-x-6', isDark);
         icon.textContent = isDark ? '☀️' : '🌙';
-        themeToggle.classList.toggle('bg-indigo-500', isDark);
-        themeToggle.classList.toggle('bg-gray-300', !isDark);
+        themeToggle.style.backgroundColor = isDark ? '#42695a' : '#cbd4cf';
         themeToggle.setAttribute('aria-label', isDark ? 'Activar modo diurno' : 'Activar modo nocturno');
         themeToggle.setAttribute('aria-checked', String(isDark));
         themeToggle.title = isDark ? 'Activar modo diurno' : 'Activar modo nocturno';
