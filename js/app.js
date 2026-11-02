@@ -141,21 +141,9 @@ function switchView(target) {
     viewStats.classList.toggle('hidden', showingDashboard);
     viewStats.classList.toggle('flex', !showingDashboard);
 
-    navDashboard.classList.toggle('bg-white', showingDashboard);
-    navDashboard.classList.toggle('dark:bg-gray-600', showingDashboard);
-    navDashboard.classList.toggle('text-gray-800', showingDashboard);
-    navDashboard.classList.toggle('dark:text-white', showingDashboard);
-    navDashboard.classList.toggle('shadow-sm', showingDashboard);
-    navDashboard.classList.toggle('text-gray-500', !showingDashboard);
-    navDashboard.classList.toggle('dark:text-gray-400', !showingDashboard);
-
-    navStats.classList.toggle('bg-white', !showingDashboard);
-    navStats.classList.toggle('dark:bg-gray-600', !showingDashboard);
-    navStats.classList.toggle('text-gray-800', !showingDashboard);
-    navStats.classList.toggle('dark:text-white', !showingDashboard);
-    navStats.classList.toggle('shadow-sm', !showingDashboard);
-    navStats.classList.toggle('text-gray-500', showingDashboard);
-    navStats.classList.toggle('dark:text-gray-400', showingDashboard);
+    // Navegación clara con una sola opción seleccionada: fácil de entender en móvil y escritorio.
+    navDashboard.classList.toggle('hl-nav-active', showingDashboard);
+    navStats.classList.toggle('hl-nav-active', !showingDashboard);
 
     navDashboard.setAttribute('aria-current', showingDashboard ? 'page' : 'false');
     navStats.setAttribute('aria-current', showingDashboard ? 'false' : 'page');

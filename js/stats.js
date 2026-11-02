@@ -113,9 +113,10 @@ async function loadStats() {
 
     Object.values(months).forEach(m => {
         const heightPct = (m.count / maxMonthCount) * 100;
+        // Barras con fondo suave y color verde: comunican progreso sin parecer una herramienta técnica.
         chartContainer.innerHTML += `
             <div class="flex-1 flex flex-col justify-end items-center group relative">
-                <div class="w-full bg-indigo-500 rounded-t hover:bg-indigo-400 transition-colors" style="height: ${heightPct}%"></div>
+                <div class="w-full rounded-t-lg bg-[#42695a] hover:bg-[#355747] transition-colors" style="height: ${heightPct}%"></div>
                 <span class="absolute -top-6 text-xs font-bold text-gray-600 dark:text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity">${m.count}</span>
             </div>`;
         labelsContainer.innerHTML += `<div class="flex-1 text-center">${m.label}</div>`;

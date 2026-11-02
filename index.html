@@ -27,8 +27,94 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#f9fafb">
+    <style>
+        :root {
+            color-scheme: light;
+            --hl-bg: #f4f6f5;
+            --hl-surface: #ffffff;
+            --hl-text: #202624;
+            --hl-muted: #69736f;
+            --hl-line: #dde4e0;
+            --hl-primary: #42695a;
+            --hl-primary-hover: #355747;
+            --hl-accent: #e7a84b;
+        }
+
+        .dark {
+            color-scheme: dark;
+            --hl-bg: #171c1a;
+            --hl-surface: #222824;
+            --hl-text: #edf2ef;
+            --hl-muted: #abb6b0;
+            --hl-line: #38433e;
+            --hl-primary: #7da792;
+            --hl-primary-hover: #91b8a7;
+        }
+
+        body {
+            font-family: Inter, "Segoe UI", system-ui, -apple-system, sans-serif;
+            background: var(--hl-bg);
+            color: var(--hl-text);
+        }
+
+        /* La interfaz usa superficies claras, bordes suaves y jerarquía real:
+           menos cuadros técnicos y botones de mayor tamaño para facilitar el uso cotidiano. */
+        .hl-shell { background: var(--hl-bg); }
+        .hl-header {
+            background: color-mix(in srgb, var(--hl-surface) 96%, transparent);
+            border-bottom: 1px solid var(--hl-line);
+            backdrop-filter: blur(12px);
+        }
+        .hl-card {
+            background: var(--hl-surface);
+            border: 1px solid var(--hl-line);
+            border-radius: 18px;
+            box-shadow: 0 8px 24px rgba(42, 67, 57, 0.06);
+        }
+        .hl-card-subtle { box-shadow: 0 4px 14px rgba(42, 67, 57, 0.04); }
+        .hl-btn-primary {
+            min-height: 44px;
+            border-radius: 12px;
+            background: var(--hl-primary);
+            color: #fff;
+            font-weight: 700;
+            box-shadow: 0 5px 12px rgba(66, 105, 90, 0.18);
+            transition: transform 160ms ease, background 160ms ease, box-shadow 160ms ease;
+        }
+        .hl-btn-primary:hover {
+            background: var(--hl-primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 7px 16px rgba(66, 105, 90, 0.24);
+        }
+        .hl-btn-secondary {
+            min-height: 44px;
+            border: 1px solid var(--hl-line);
+            border-radius: 12px;
+            background: var(--hl-surface);
+            color: var(--hl-text);
+            font-weight: 700;
+            transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
+        }
+        .hl-btn-secondary:hover { background: var(--hl-bg); transform: translateY(-1px); }
+        .hl-input, .hl-select, .hl-textarea {
+            min-height: 46px;
+            border-radius: 12px;
+            border: 1px solid var(--hl-line);
+            background: var(--hl-surface);
+            color: var(--hl-text);
+        }
+        .hl-input:focus, .hl-select:focus, .hl-textarea:focus {
+            border-color: var(--hl-primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(66, 105, 90, 0.13);
+        }
+        .hl-nav-active { background: var(--hl-primary) !important; color: #fff !important; }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; }
+        }
+    </style>
 </head>
-<body class="h-full bg-gray-50 text-gray-900 transition-colors dark:bg-gray-900 dark:text-gray-100">
+<body class="h-full transition-colors">
     <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[60] focus:rounded-md focus:bg-white focus:px-4 focus:py-2 focus:text-indigo-700 focus:shadow">Saltar al contenido principal</a>
     <noscript>
         <p class="m-4 rounded-md bg-red-50 p-4 text-sm text-red-700 dark:bg-red-950 dark:text-red-200">HabitLink necesita JavaScript para funcionar.</p>
@@ -36,9 +122,10 @@
     <div id="app-container" class="flex h-full flex-col">
         <p id="app-error" class="mx-auto mt-6 hidden max-w-2xl rounded-md bg-red-50 p-4 text-sm text-red-700 dark:bg-red-950 dark:text-red-200" role="alert"></p>
         <section id="view-auth" class="hidden flex flex-1 items-center justify-center p-4">
-            <div class="w-full max-w-md rounded-lg bg-white p-8 shadow-md dark:bg-gray-800">
-                <h1 class="mb-2 text-center text-3xl font-bold text-indigo-600">HabitLink</h1>
-                <p class="mb-6 text-center text-sm text-gray-500 dark:text-gray-300">Crece junto a otras personas</p>
+            <div class="hl-card w-full max-w-md p-7 sm:p-8">
+                <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#42695a] text-2xl text-white shadow-lg">✓</div>
+                <h1 class="mb-2 text-center text-3xl font-black tracking-tight">HabitLink</h1>
+                <p class="mb-7 text-center text-sm text-[#69736f] dark:text-[#abb6b0]">Pequeños pasos, una vida que cambia contigo.</p>
                 <div class="mb-6 flex border-b border-gray-200 dark:border-gray-600" role="tablist" aria-label="Acceso">
                     <button id="tab-login" type="button" role="tab" aria-selected="true" aria-controls="auth-form" class="flex-1 border-b-2 border-indigo-600 py-2 text-center font-medium text-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500">Iniciar sesión</button>
                     <button id="tab-register" type="button" role="tab" aria-selected="false" aria-controls="auth-form" class="flex-1 py-2 text-center font-medium text-gray-500 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">Registrarse</button>
@@ -46,29 +133,29 @@
                 <form id="auth-form" class="space-y-4">
                     <div id="username-field" class="hidden">
                         <label for="username" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Nombre de usuario</label>
-                        <input type="text" id="username" minlength="3" maxlength="24" autocomplete="username" class="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white sm:text-sm" placeholder="tu_usuario">
+                        <input type="text" id="username" minlength="3" maxlength="24" autocomplete="username" class="hl-input mt-1 block w-full px-3 py-2 text-sm" placeholder="tu_usuario">
                     </div>
                     <div>
                         <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Email</label>
-                        <input type="email" id="email" required autocomplete="email" class="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white sm:text-sm" placeholder="tu@email.com">
+                        <input type="email" id="email" required autocomplete="email" class="hl-input mt-1 block w-full px-3 py-2 text-sm" placeholder="tu@email.com">
                     </div>
                     <div>
                         <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Contraseña</label>
-                        <input type="password" id="password" required minlength="6" autocomplete="current-password" class="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white sm:text-sm" placeholder="Mínimo 6 caracteres">
+                        <input type="password" id="password" required minlength="6" autocomplete="current-password" class="hl-input mt-1 block w-full px-3 py-2 text-sm" placeholder="Mínimo 6 caracteres">
                     </div>
                     <div id="auth-message" class="hidden text-center text-sm" role="status" aria-live="polite"></div>
-                    <button type="submit" id="auth-submit-btn" class="w-full rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">Entrar</button>
+                    <button type="submit" id="auth-submit-btn" class="hl-btn-primary w-full px-5 focus:outline-none focus:ring-2 focus:ring-[#42695a] focus:ring-offset-2">Entrar</button>
                 </form>
             </div>
         </section>
 
-        <section id="view-dashboard" class="hidden flex flex-1 flex-col bg-gray-50 dark:bg-gray-900">
+        <section id="view-dashboard" class="hl-shell hidden flex flex-1 flex-col">
             <!-- Cabecera del dashboard: identidad, navegación y acciones quedan en una sola fila adaptable. -->
-            <header class="grid grid-cols-1 items-center gap-3 bg-white px-4 py-3 shadow-sm dark:bg-gray-800 sm:px-6 sm:py-4 lg:grid-cols-[minmax(0,1fr)_auto]">
+            <header class="hl-header grid grid-cols-1 items-center gap-3 px-4 py-3 sm:px-6 sm:py-4 lg:grid-cols-[minmax(0,1fr)_auto]">
                 <div class="flex min-w-0 flex-col gap-3 md:flex-row md:items-center md:gap-5">
                     <div class="flex items-center gap-3">
                         <!-- Espacio reservado para el logo: sustituir el SVG por la imagen definitiva sin cambiar la estructura. -->
-                        <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-sm" aria-label="Logo de HabitLink">
+                        <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#42695a] text-white shadow-sm" aria-label="Logo de HabitLink">
                             <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                 <path d="M8.5 12.5 12 16l7-7" />
                                 <path d="M21 12a9 9 0 1 1-3.1-6.8" />
@@ -79,27 +166,28 @@
                             <p class="truncate text-sm text-gray-500 dark:text-gray-300" id="user-greeting">Cargando usuario...</p>
                         </div>
                     </div>
-                    <nav class="grid grid-cols-2 rounded-lg bg-gray-100 p-1 dark:bg-gray-700 md:flex md:w-auto" aria-label="Secciones principales">
-                        <button id="nav-dashboard" type="button" aria-current="page" class="rounded-md bg-white px-3 py-2 text-sm font-medium text-gray-800 shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:px-4 dark:bg-gray-600 dark:text-white">Dashboard</button>
-                        <button id="nav-stats" type="button" class="rounded-md px-3 py-2 text-sm font-medium text-gray-500 transition-all hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:px-4 dark:text-gray-400 dark:hover:text-gray-200">Estadísticas</button>
+                    <nav class="grid grid-cols-2 rounded-xl border border-[#dde4e0] bg-[#edf1ef] p-1 dark:border-[#38433e] dark:bg-[#171c1a] md:flex md:w-auto" aria-label="Secciones principales">
+                        <button id="nav-dashboard" type="button" aria-current="page" class="hl-nav-active min-h-10 rounded-lg px-4 py-2 text-sm font-bold transition-all focus:outline-none focus:ring-2 focus:ring-[#42695a]">Mis hábitos</button>
+                        <button id="nav-stats" type="button" class="min-h-10 rounded-lg px-4 py-2 text-sm font-bold text-[#69736f] transition-all hover:text-[#202624] focus:outline-none focus:ring-2 focus:ring-[#42695a] dark:text-[#abb6b0] dark:hover:text-white">Mi progreso</button>
                     </nav>
                 </div>
                 <div class="grid grid-cols-[1fr_auto_auto] items-center gap-2 sm:flex sm:flex-wrap sm:justify-end sm:gap-3">
-                    <button id="btn-add-habit" type="button" class="min-w-0 rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:px-4 dark:focus:ring-offset-gray-800"><span aria-hidden="true">+</span><span class="ml-1 sm:hidden">Nuevo</span><span class="hidden sm:inline"> Nuevo hábito</span></button>
+                    <button id="btn-add-habit" type="button" class="hl-btn-primary min-w-0 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#42695a] focus:ring-offset-2"><span aria-hidden="true">＋</span><span class="ml-1 sm:hidden">Nuevo</span><span class="hidden sm:inline"> Nuevo hábito</span></button>
                     <!-- Interruptor de tema: su estado visual se sincroniza desde js/app.js. -->
                     <button id="btn-theme-toggle" type="button" role="switch" aria-label="Activar modo nocturno" aria-checked="false" title="Activar modo nocturno" class="relative h-8 w-14 shrink-0 rounded-full bg-gray-300 shadow-inner transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800">
                         <span data-theme-thumb class="absolute left-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-white text-xs shadow transition-transform duration-200" aria-hidden="true">
                             <span data-theme-icon>🌙</span>
                         </span>
                     </button>
-                    <button id="btn-logout" type="button" class="rounded-md bg-gray-200 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 dark:focus:ring-offset-gray-800">Salir</button>
+                    <button id="btn-logout" type="button" class="hl-btn-secondary px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#42695a]">Salir</button>
                 </div>
             </header>
 
             <!-- Tarjeta de insignias separada: conserva una superficie limpia sin competir con el header. -->
-            <section class="border-b border-amber-100 bg-amber-50/60 px-4 py-3 dark:border-amber-900/40 dark:bg-gray-900" aria-label="Insignias">
+            <!-- Insignias en una sola superficie suave: celebran el logro sin ocupar espacio visual constantemente. -->
+            <section class="border-b border-[#dde4e0] bg-[#eef2ef] px-4 py-3 dark:border-[#38433e] dark:bg-[#171c1a]" aria-label="Insignias">
                 <div class="mx-auto max-w-7xl">
-                    <button id="badges-toggle" type="button" aria-expanded="false" aria-controls="badges-panel" class="flex w-full items-center gap-3 rounded-xl border border-amber-200 bg-white px-3 py-2.5 text-left shadow-sm transition-colors hover:border-amber-300 hover:bg-amber-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-amber-800 dark:bg-gray-800 dark:hover:bg-gray-700 sm:px-4">
+                    <button id="badges-toggle" type="button" aria-expanded="false" aria-controls="badges-panel" class="hl-card-subtle flex min-h-14 w-full items-center gap-3 px-3 py-2.5 text-left transition-colors hover:border-[#e7a84b] focus:outline-none focus:ring-2 focus:ring-[#42695a] sm:px-4">
                         <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-100 text-xl ring-4 ring-white dark:bg-amber-900/40 dark:ring-gray-800" aria-hidden="true">🏆</span>
                         <span class="min-w-0 flex-1">
                             <span class="flex items-baseline justify-between gap-2">
@@ -123,11 +211,17 @@
                 </div>
             </section>
 
-            <main id="main-content" class="grid flex-1 grid-cols-1 gap-6 overflow-y-auto p-6 lg:grid-cols-3">
+            <main id="main-content" class="mx-auto grid w-full max-w-7xl flex-1 grid-cols-1 gap-6 overflow-y-auto p-4 sm:p-6 lg:grid-cols-3">
                 <section class="lg:col-span-2" aria-labelledby="habits-heading">
-                    <h2 id="habits-heading" class="mb-4 text-lg font-semibold text-gray-700 dark:text-gray-200">Mis hábitos</h2>
+                    <div class="mb-5 flex items-end justify-between gap-3">
+                        <div>
+                            <p class="text-xs font-bold uppercase tracking-[0.16em] text-[#69736f] dark:text-[#abb6b0]">Tu día</p>
+                            <h2 id="habits-heading" class="mt-1 text-2xl font-black tracking-tight">Mis hábitos</h2>
+                        </div>
+                        <button type="button" onclick="document.getElementById('btn-add-habit').click()" class="hl-btn-primary hidden px-4 sm:inline-flex sm:items-center">＋ Añadir</button>
+                    </div>
                     <!-- Gráficas de cumplimiento semanal. Se mantienen separadas del mapa anual. -->
-                    <section id="weekly-charts-container" class="mb-6 rounded-lg bg-white p-5 shadow dark:bg-gray-800" aria-labelledby="weekly-chart-heading">
+                    <section id="weekly-charts-container" class="hl-card hl-card-subtle mb-6 p-5" aria-labelledby="weekly-chart-heading">
                         <div class="mb-4 flex items-center justify-between">
                             <h3 id="weekly-chart-heading" class="text-sm font-semibold text-gray-700 dark:text-gray-200">Cumplimiento esta semana</h3>
                             <span id="weekly-percentage" class="text-xs font-bold text-indigo-600 dark:text-indigo-400" aria-live="polite">0%</span>
@@ -153,7 +247,7 @@
                     
 
                     <!-- Calendario anual: muestra la actividad de los últimos 365 días. -->
-                    <section id="yearly-heatmap-container" class="mb-6 rounded-lg bg-white p-5 shadow dark:bg-gray-800" aria-labelledby="yearly-heatmap-heading">
+                    <section id="yearly-heatmap-container" class="hl-card hl-card-subtle mb-6 p-5" aria-labelledby="yearly-heatmap-heading">
                         <div class="mb-3 flex items-center justify-between">
                             <h3 id="yearly-heatmap-heading" class="text-sm font-semibold text-gray-700 dark:text-gray-200">Actividad del último año</h3>
                             <span id="yearly-total" class="text-xs text-gray-500 dark:text-gray-400" aria-live="polite">0 hábitos completados</span>
@@ -179,25 +273,28 @@
                         <p id="weekly-summary" class="rounded-lg bg-white p-4 text-sm font-medium text-gray-700 shadow dark:bg-gray-800 dark:text-gray-200">0 de 0 hábitos semanales completados esta semana</p>
                     </div>
                     <div id="habits-list" class="grid gap-4 sm:grid-cols-2" aria-live="polite"></div>
-                    <div id="empty-state" class="hidden rounded-lg bg-white py-12 text-center dark:bg-gray-800" role="status">
-                        <p class="text-lg text-gray-400 dark:text-gray-300">Aún no tienes hábitos. ¡Crea el primero!</p>
+                    <div id="empty-state" class="hl-card hidden py-12 text-center" role="status">
+                        <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[#e9f0ec] text-2xl">🌱</div>
+                        <p class="text-lg font-bold">Empieza con algo sencillo</p>
+                        <p class="mt-1 text-sm text-[#69736f] dark:text-[#abb6b0]">Crea tu primer hábito y da hoy el primer paso.</p>
+                        <button type="button" onclick="document.getElementById('btn-add-habit').click()" class="hl-btn-primary mt-5 px-5">＋ Crear un hábito</button>
                     </div>
                 </section>
                 <aside class="space-y-6">
-                    <section class="rounded-lg bg-white p-5 shadow dark:bg-gray-800" aria-labelledby="partners-heading">
+                    <section class="hl-card hl-card-subtle p-5" aria-labelledby="partners-heading">
                         <div class="mb-4 flex items-center justify-between">
                             <h2 id="partners-heading" class="text-lg font-semibold text-gray-700 dark:text-gray-200">Mis compañeros</h2>
-                            <button id="btn-find-partner" type="button" class="text-sm font-medium text-indigo-600 hover:text-indigo-800 focus:outline-none focus:ring-2 focus:ring-indigo-500">+ Buscar</button>
+                            <button id="btn-find-partner" type="button" class="hl-btn-secondary min-h-10 px-3 text-sm text-[#42695a] focus:outline-none focus:ring-2 focus:ring-[#42695a]">＋ Buscar</button>
                         </div>
                         <div id="partner-list" class="space-y-3">
                             <p class="py-4 text-center text-sm text-gray-400 dark:text-gray-300">Sin compañeros aún</p>
                         </div>
                     </section>
-                    <section id="partner-progress" class="hidden rounded-lg bg-white p-5 shadow dark:bg-gray-800" aria-labelledby="partner-progress-heading">
+                    <section id="partner-progress" class="hl-card hl-card-subtle hidden p-5" aria-labelledby="partner-progress-heading">
                         <h2 id="partner-progress-heading" class="mb-4 text-lg font-semibold text-gray-700 dark:text-gray-200">Progreso de mis compañeros</h2>
                         <div id="partner-habits" class="space-y-4"></div>
                     </section>
-                    <section id="requests-section" class="hidden rounded-lg bg-white p-5 shadow dark:bg-gray-800" aria-labelledby="requests-heading">
+                    <section id="requests-section" class="hl-card hl-card-subtle hidden p-5" aria-labelledby="requests-heading">
                         <h2 id="requests-heading" class="mb-4 text-lg font-semibold text-gray-700 dark:text-gray-200">Solicitudes de compañeros</h2>
                         <div id="requests-list" class="space-y-3"></div>
                     </section>
@@ -206,11 +303,14 @@
         </section>
 
         <!-- VISTA DE ESTADÍSTICAS -->
-<section id="view-stats" class="hidden flex-1 flex-col bg-gray-50 dark:bg-gray-900 overflow-y-auto" aria-labelledby="stats-title">
-    <header class="flex flex-col gap-3 border-b border-gray-200 bg-white px-4 py-4 dark:border-gray-700 dark:bg-gray-800 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-        <h2 id="stats-title" tabindex="-1" class="text-xl font-bold text-gray-800 dark:text-gray-100 outline-none">Tus Estadísticas Globales</h2>
+<section id="view-stats" class="hl-shell hidden flex-1 flex-col overflow-y-auto" aria-labelledby="stats-title">
+    <header class="hl-header flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+        <div>
+            <p class="text-xs font-bold uppercase tracking-[0.16em] text-[#69736f] dark:text-[#abb6b0]">Resumen personal</p>
+            <h2 id="stats-title" tabindex="-1" class="mt-1 text-2xl font-black outline-none">Tu progreso</h2>
+        </div>
         <nav class="w-full sm:w-auto" aria-label="Navegación de estadísticas">
-            <button id="stats-back-dashboard" type="button" class="w-full rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:w-auto dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700">
+            <button id="stats-back-dashboard" type="button" class="hl-btn-secondary w-full px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#42695a] sm:w-auto">
                 ← Volver al Dashboard
             </button>
         </nav>
@@ -219,27 +319,27 @@
         
         <!-- Tarjetas de Resumen -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow border-l-4 border-indigo-500">
-                <p class="text-xs text-gray-500 dark:text-gray-400 uppercase font-semibold">Total Completados</p>
+            <div class="hl-card hl-card-subtle border-l-4 border-[#42695a] p-4">
+                <p class="text-xs font-bold uppercase tracking-wide text-[#69736f] dark:text-[#abb6b0]">Veces completadas</p>
                 <p id="stat-total" class="text-2xl font-bold text-gray-800 dark:text-white mt-1">0</p>
             </div>
-            <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow border-l-4 border-orange-500">
+            <div class="hl-card hl-card-subtle border-l-4 border-orange-500 p-4">
                 <p class="text-xs text-gray-500 dark:text-gray-400 uppercase font-semibold">Racha Más Larga</p>
                 <p id="stat-longest-streak" class="text-2xl font-bold text-gray-800 dark:text-white mt-1">0 días</p>
             </div>
-            <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow border-l-4 border-green-500">
+            <div class="hl-card hl-card-subtle border-l-4 border-green-500 p-4">
                 <p class="text-xs text-gray-500 dark:text-gray-400 uppercase font-semibold">Mejor Día</p>
                 <p id="stat-best-day" class="text-2xl font-bold text-gray-800 dark:text-white mt-1">-</p>
             </div>
-            <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow border-l-4 border-purple-500">
+            <div class="hl-card hl-card-subtle border-l-4 border-[#8a7aa5] p-4">
                 <p class="text-xs text-gray-500 dark:text-gray-400 uppercase font-semibold">Hábito Top</p>
                 <p id="stat-best-habit" class="text-lg font-bold text-gray-800 dark:text-white mt-1 truncate">-</p>
             </div>
         </div>
 
         <!-- Gráfico de Evolución Mensual (Simple) -->
-        <div class="bg-white dark:bg-gray-800 p-5 rounded-lg shadow">
-            <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-200 mb-4">Hábitos completados por mes (Últimos 6 meses)</h3>
+        <div class="hl-card hl-card-subtle p-5">
+            <h3 class="mb-4 text-sm font-bold">Completados en los últimos 6 meses</h3>
             <div id="monthly-chart" class="flex items-end justify-between h-40 gap-2 border-b border-gray-200 dark:border-gray-700 pb-2">
                 <!-- Barras inyectadas por JS -->
             </div>
@@ -250,51 +350,52 @@
     </div>
 </section>
 
-        <div id="modal-partner" class="fixed inset-0 z-50 hidden items-center justify-center bg-black bg-opacity-50 p-4" role="dialog" aria-modal="true" aria-labelledby="partner-modal-heading">
-            <section class="w-full max-w-md rounded-lg bg-white p-6 shadow-xl dark:bg-gray-800">
+        <div id="modal-partner" class="fixed inset-0 z-50 hidden items-center justify-center bg-[#171c1a]/50 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="partner-modal-heading">
+            <section class="hl-card w-full max-w-md p-6 shadow-xl">
                 <h2 id="partner-modal-heading" class="mb-4 text-xl font-bold text-gray-800 dark:text-gray-100">Buscar compañero</h2>
                 <div class="space-y-4">
                     <div>
                         <label for="search-username" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Nombre de usuario</label>
-                        <input type="search" id="search-username" autocomplete="off" maxlength="24" class="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white sm:text-sm" placeholder="Ej.: KevCar">
+                        <input type="search" id="search-username" autocomplete="off" maxlength="24" class="hl-input mt-1 block w-full px-3 py-2 text-sm" placeholder="Ej.: KevCar">
                     </div>
                     <div id="search-results" class="max-h-60 space-y-2 overflow-y-auto" aria-live="polite"></div>
                     <div id="partner-message" class="hidden text-center text-sm" role="status" aria-live="polite"></div>
                     <div class="flex justify-end pt-2">
-                        <button type="button" id="btn-cancel-partner" class="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700">Cerrar</button>
+                        <button type="button" id="btn-cancel-partner" class="hl-btn-secondary px-5 text-sm">Cerrar</button>
                     </div>
                 </div>
             </section>
         </div>
 
-        <div id="modal-habit" class="fixed inset-0 z-50 hidden items-center justify-center bg-black bg-opacity-50 p-4" role="dialog" aria-modal="true" aria-labelledby="habit-modal-heading">
-            <section class="w-full max-w-md rounded-lg bg-white p-6 shadow-xl dark:bg-gray-800">
+        <div id="modal-habit" class="fixed inset-0 z-50 hidden items-center justify-center bg-[#171c1a]/50 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="habit-modal-heading">
+            <section class="hl-card w-full max-w-md p-6 shadow-xl">
                 <h2 id="habit-modal-heading" class="mb-4 text-xl font-bold text-gray-800 dark:text-gray-100">Nuevo hábito</h2>
                 <form id="habit-form" class="space-y-4">
                     <div>
                         <label for="habit-title" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Título</label>
-                        <input type="text" id="habit-title" required maxlength="100" class="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white sm:text-sm" placeholder="Ej.: Leer 30 minutos">
+                        <input type="text" id="habit-title" required maxlength="100" class="hl-input mt-1 block w-full px-3 py-2 text-sm" placeholder="Ej.: Leer 30 minutos">
                     </div>
                     <div>
                         <label for="habit-description" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Descripción (opcional)</label>
-                        <textarea id="habit-description" rows="2" maxlength="500" class="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white sm:text-sm" placeholder="Detalles del hábito..."></textarea>
+                        <textarea id="habit-description" rows="2" maxlength="500" class="hl-textarea mt-1 block w-full px-3 py-3 text-sm" placeholder="Detalles del hábito..."></textarea>
                     </div>
                     <div>
                         <label for="habit-frequency" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Frecuencia</label>
-                        <select id="habit-frequency" class="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white sm:text-sm">
+                        <select id="habit-frequency" class="hl-select mt-1 block w-full px-3 py-2 text-sm">
                             <option value="daily">Diario</option>
                             <option value="weekly">Semanal (una vez por semana)</option>
                         </select>
                     </div>
                     <div id="habit-message" class="hidden text-center text-sm" role="status" aria-live="polite"></div>
                     <div class="flex justify-end gap-3 pt-2">
-                        <button type="button" id="btn-cancel-habit" class="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700">Cancelar</button>
-                        <button id="habit-submit-btn" type="submit" class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800">Crear</button>
+                        <button type="button" id="btn-cancel-habit" class="hl-btn-secondary px-5 text-sm">Cancelar</button>
+                        <button id="habit-submit-btn" type="submit" class="hl-btn-primary px-5 text-sm">Guardar hábito</button>
                     </div>
                 </form>
             </section>
         </div>
     </div>
+    <div id="toast-container" class="pointer-events-none fixed right-3 top-20 z-50 flex flex-col gap-3 sm:right-5" aria-live="polite"></div>
 
     <script src="js/config.js"></script>
     <script src="js/supabase.js"></script>
@@ -304,8 +405,5 @@
     <script src="js/stats.js"></script>
     <script src="js/badges.js"></script>
     <script src="js/app.js"></script>
-    
 </body>
-<!-- Contenedor para Notificaciones Toast --> 
- <div id="toast-container" class="fixed top-20 right-5 z-50 flex flex-col gap-3 pointer-events-none"></div>
 </html>

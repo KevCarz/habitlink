@@ -159,11 +159,11 @@ async function loadPartners() {
             const userId = partnership.user_1 === currentUser.id ? partnership.user_2 : partnership.user_1;
             const username = profileById.get(userId)?.username || 'Usuario';
             return `
-                <div class="flex items-center gap-3 rounded-md border border-green-200 bg-green-50 p-3 dark:border-green-800 dark:bg-green-950">
+                <div class="flex items-center gap-3 rounded-xl border border-[#dde4e0] bg-[#f7f9f8] p-3 dark:border-[#38433e] dark:bg-[#171c1a]">
                     <div class="flex h-8 w-8 items-center justify-center rounded-full bg-green-500 text-sm font-bold text-white">${escapeHTML(username.charAt(0).toUpperCase())}</div>
                     <div class="flex-1">
                         <p class="font-medium text-gray-800 dark:text-gray-100">${escapeHTML(username)}</p>
-                        <p class="text-xs text-green-600">Conectados</p>
+                        <p class="text-xs font-bold text-[#42695a] dark:text-[#91b8a7]">Conectados</p>
                     </div>
                 </div>`;
         }).join('')
@@ -180,8 +180,8 @@ async function loadPartners() {
                         <p class="text-xs text-gray-500 dark:text-gray-300">Quiere ser tu compañero</p>
                     </div>
                     <div class="flex gap-2">
-                        <button type="button" data-action="respond" data-partnership-id="${escapeHTML(partnership.id)}" data-status="active" class="rounded bg-green-500 px-2 py-1 text-xs text-white hover:bg-green-600">Aceptar</button>
-                        <button type="button" data-action="respond" data-partnership-id="${escapeHTML(partnership.id)}" data-status="rejected" class="rounded bg-red-500 px-2 py-1 text-xs text-white hover:bg-red-600">Rechazar</button>
+                        <button type="button" data-action="respond" data-partnership-id="${escapeHTML(partnership.id)}" data-status="active" class="min-h-11 rounded-xl bg-[#42695a] px-3 text-sm font-bold text-white hover:bg-[#355747]">Aceptar</button>
+                        <button type="button" data-action="respond" data-partnership-id="${escapeHTML(partnership.id)}" data-status="rejected" class="min-h-11 rounded-xl border border-[#dde4e0] px-3 text-sm font-bold text-[#69736f] hover:bg-[#f4f6f5] dark:text-[#abb6b0]">Rechazar</button>
                     </div>
                 </div>`;
         }),

@@ -140,12 +140,13 @@ async function loadHabits() {
         const isCompleted = (isWeekly ? completedThisWeek : completedToday).has(habit.id);
         
         const card = document.createElement('article');
-        card.className = `rounded-lg border-l-4 bg-white dark:bg-gray-800 p-5 shadow transition-all hover:shadow-md ${isCompleted ? 'border-green-500' : 'border-indigo-500'}`;
+        // Tarjeta más cálida y táctil: conserva el estado del hábito sin usar bordes técnicos pesados.
+        card.className = `hl-card hl-card-subtle p-5 transition-all hover:-translate-y-0.5 ${isCompleted ? 'ring-1 ring-green-500/30' : ''}`;
         
         card.innerHTML = `
             <div class="mb-2 flex items-start justify-between gap-2">
                 <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100 ${isCompleted ? 'line-through text-gray-400' : ''}">${escapeHTML(habit.title)}</h3>
-                <span class="shrink-0 rounded-full px-2 py-1 text-xs ${isWeekly ? 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-200' : 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200'}">${isWeekly ? 'Semanal' : 'Diario'}</span>
+                <span class="shrink-0 rounded-full px-3 py-1.5 text-xs font-bold ${isWeekly ? 'bg-[#eee9f5] text-[#705d8a] dark:bg-[#3a3247] dark:text-[#d9ccec]' : 'bg-[#e9f0ec] text-[#42695a] dark:bg-[#314238] dark:text-[#b9d0c4]'}">${isWeekly ? 'Cada semana' : 'Cada día'}</span>
             </div>
             ${habit.description ? `<p class="mb-3 text-sm text-gray-500 dark:text-gray-400">${escapeHTML(habit.description)}</p>` : ''}
             ${generateHeatmap(habit.id)}
@@ -154,13 +155,13 @@ async function loadHabits() {
                     🔥 Racha: <span class="text-orange-500 dark:text-orange-400">${habit.streak_count || 0} días</span>
                 </span>
             <div class="flex gap-2">
-                  <button type="button" data-action="toggle" data-habit-id="${escapeHTML(habit.id)}" data-frequency="${isWeekly ? 'weekly' : 'daily'}" data-completed="${isCompleted}" class="rounded px-3 py-1.5 text-xs font-medium transition-colors ${isCompleted ? 'bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-300' : 'bg-green-500 text-white hover:bg-green-600'}">
-                  ${isCompleted ? 'Desmarcar' : 'Marcar'}
+                  <button type="button" data-action="toggle" data-habit-id="${escapeHTML(habit.id)}" data-frequency="${isWeekly ? 'weekly' : 'daily'}" data-completed="${isCompleted}" class="min-h-11 rounded-xl px-4 py-2 text-sm font-bold transition-colors focus:outline-none focus:ring-2 focus:ring-[#42695a] ${isCompleted ? 'border border-[#dde4e0] bg-[#f4f6f5] text-[#69736f] dark:bg-[#171c1a] dark:text-[#abb6b0]' : 'bg-[#42695a] text-white shadow-sm hover:bg-[#355747]'}">
+                  ${isCompleted ? 'Desmarcar' : '✓ Hecho'}
                 </button>
-                  <button type="button" data-action="edit" data-habit-id="${escapeHTML(habit.id)}" class="rounded bg-blue-100 px-3 py-1.5 text-xs font-medium text-blue-600 hover:bg-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50" aria-label="Editar">
+                  <button type="button" data-action="edit" data-habit-id="${escapeHTML(habit.id)}" class="flex min-h-11 w-11 items-center justify-center rounded-xl bg-[#edf1ef] text-base text-[#42695a] hover:bg-[#dde6e1] dark:bg-[#2d3832] dark:text-[#b9d0c4]" aria-label="Editar hábito">
         ✏️
                 </button>
-                <button type="button" data-action="delete" data-habit-id="${escapeHTML(habit.id)}" class="rounded bg-red-100 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50" aria-label="Eliminar">
+                <button type="button" data-action="delete" data-habit-id="${escapeHTML(habit.id)}" class="flex min-h-11 w-11 items-center justify-center rounded-xl bg-[#f8ecea] text-base text-[#a34e42] hover:bg-[#f2ddd9] dark:bg-[#4a302d] dark:text-[#efb6ac]" aria-label="Eliminar hábito">
         🗑
                 </button>
                 </div>
