@@ -310,7 +310,37 @@ async function subscribeToPartnerChanges(userId) {
         .channel(`partners-${userId}`)
         .on('postgres_changes', { event: '*', schema: 'public', table: 'partnerships' }, loadPartners)
         .on('postgres_changes', { event: '*', schema: 'public', table: 'habits' }, loadPartners)
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'habit_logs' }, loadPartners)
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'habit_logs' }, async (payload) => {
+            // Recargar UI
+            loadPartners();
+            
+            // Enviar notificación si el log es de un compañero
+            const log = payload.new;
+            if (log && log.habit_id) {
+                // Buscar a qué hábito y usuario pertenece este log
+                const { data: habit } = await supabaseClient
+                    .from('habits')
+                    .select('user_id, title')
+                    .eq('id', log.habit_id)
+                    .single();
+
+                // Si el hábito NO es mío, es de mi compañero
+                if (habit && habit.user_id !== userId) {
+                    const { data: partner } = await supabaseClient
+                        .from('profiles')
+                        .select('username')
+                        .eq('id', habit.user_id)
+                        .single();
+
+                    if (partner && typeof sendNotification === 'function') {
+                        sendNotification(
+                            `🔥 ¡${partner.username} completó un hábito!`,
+                            `"${habit.title}" - ¡No te quedes atrás!`
+                        );
+                    }
+                }
+            }
+        })
         .subscribe(status => {
             if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
                 console.error('No se pudo conectar a las actualizaciones en tiempo real de compañeros:', status);

@@ -124,6 +124,15 @@ const viewStats = document.getElementById('view-stats');
 const badgesToggle = document.getElementById('badges-toggle');
 const badgesPanel = document.getElementById('badges-panel');
 const badgesToggleIcon = document.getElementById('badges-toggle-icon');
+// --- INICIALIZAR NOTIFICACIONES ---
+if (typeof initNotifications === 'function') {
+    initNotifications();
+}
+
+const btnEnableNotifications = document.getElementById('btn-enable-notifications');
+if (btnEnableNotifications) {
+    btnEnableNotifications.addEventListener('click', requestNotificationPermission);
+}
 
 if (badgesToggle) {
     badgesToggle.addEventListener('click', () => {
