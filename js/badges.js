@@ -134,7 +134,7 @@ async function checkAndUnlockBadges() {
     }
 
     // C. Identificar las NUEVAS (Elegibles pero no actuales)
-    const { data: allBadgesCatalog } = await supabaseClient.from('badges').select('id, code');
+    const { data: allBadgesCatalog } = await supabaseClient.from('badges').select('id, code, icon, name, description');
     const newBadgesToUnlock = [];
 
     eligibleCodes.forEach(code => {
