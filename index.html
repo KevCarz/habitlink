@@ -11,6 +11,10 @@
     const initialTheme = savedTheme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
     document.documentElement.classList.toggle('dark', initialTheme === 'dark');
     </script>
+    <!-- Fuente Inter -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
     tailwind.config = {
@@ -27,92 +31,238 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#f9fafb">
+    
     <style>
-        :root {
-            color-scheme: light;
-            --hl-bg: #f4f6f5;
-            --hl-surface: #ffffff;
-            --hl-text: #202624;
-            --hl-muted: #69736f;
-            --hl-line: #dde4e0;
-            --hl-primary: #42695a;
-            --hl-primary-hover: #355747;
-            --hl-accent: #e7a84b;
-        }
+    /* ===== FUENTE INTER ===== */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
-        .dark {
-            color-scheme: dark;
-            --hl-bg: #171c1a;
-            --hl-surface: #222824;
-            --hl-text: #edf2ef;
-            --hl-muted: #abb6b0;
-            --hl-line: #38433e;
-            --hl-primary: #7da792;
-            --hl-primary-hover: #91b8a7;
-        }
+    /* ===== VARIABLES DE DISEÑO ===== */
+    :root {
+        color-scheme: light;
+        --hl-bg: #f8f9fc;
+        --hl-surface: #ffffff;
+        --hl-text: #1a1d2e;
+        --hl-muted: #6b7280;
+        --hl-line: #e5e7eb;
+        --hl-primary: #4f46e5;
+        --hl-primary-hover: #4338ca;
+        --hl-primary-light: rgba(79, 70, 229, 0.1);
+        --hl-accent: #f59e0b;
+        --hl-success: #10b981;
+        --hl-danger: #ef4444;
+        --radius-sm: 8px;
+        --radius-md: 12px;
+        --radius-lg: 16px;
+        --radius-xl: 20px;
+        --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+        --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
 
-        body {
-            font-family: Inter, "Segoe UI", system-ui, -apple-system, sans-serif;
-            background: var(--hl-bg);
-            color: var(--hl-text);
-        }
+    .dark {
+        color-scheme: dark;
+        --hl-bg: #0f1117;
+        --hl-surface: #1a1d2e;
+        --hl-text: #f3f4f6;
+        --hl-muted: #9ca3af;
+        --hl-line: #2d3142;
+        --hl-primary: #6366f1;
+        --hl-primary-hover: #818cf8;
+        --hl-primary-light: rgba(99, 102, 241, 0.15);
+        --hl-accent: #fbbf24;
+        --hl-success: #34d399;
+        --hl-danger: #f87171;
+    }
 
-        /* La interfaz usa superficies claras, bordes suaves y jerarquía real:
-           menos cuadros técnicos y botones de mayor tamaño para facilitar el uso cotidiano. */
-        .hl-shell { background: var(--hl-bg); }
-        .hl-header {
-            background: color-mix(in srgb, var(--hl-surface) 96%, transparent);
-            border-bottom: 1px solid var(--hl-line);
-            backdrop-filter: blur(12px);
+    /* ===== BASE ===== */
+    body {
+        font-family: 'Inter', "Segoe UI", system-ui, -apple-system, sans-serif;
+        background: var(--hl-bg);
+        color: var(--hl-text);
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+
+    .hl-shell { background: var(--hl-bg); }
+
+    /* ===== HEADER CON GLASSMORPHISM ===== */
+    .hl-header {
+        background: color-mix(in srgb, var(--hl-surface) 85%, transparent);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border-bottom: 1px solid var(--hl-line);
+        position: sticky;
+        top: 0;
+        z-index: 30;
+    }
+
+    /* ===== TARJETAS ===== */
+    .hl-card {
+        background: var(--hl-surface);
+        border: 1px solid var(--hl-line);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-md);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .hl-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .hl-card-subtle {
+        box-shadow: var(--shadow-sm);
+    }
+
+    /* ===== BOTONES ===== */
+    .hl-btn-primary {
+        min-height: 48px;
+        padding: 12px 24px;
+        border-radius: var(--radius-md);
+        background: var(--hl-primary);
+        color: #fff;
+        font-weight: 700;
+        font-size: 15px;
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+        transition: transform 160ms ease, background 160ms ease, box-shadow 160ms ease;
+        cursor: pointer;
+        border: none;
+    }
+
+    .hl-btn-primary:hover {
+        background: var(--hl-primary-hover);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(79, 70, 229, 0.35);
+    }
+
+    .hl-btn-primary:active {
+        transform: translateY(0);
+    }
+
+    .hl-btn-secondary {
+        min-height: 48px;
+        padding: 12px 20px;
+        border: 1px solid var(--hl-line);
+        border-radius: var(--radius-md);
+        background: var(--hl-surface);
+        color: var(--hl-text);
+        font-weight: 600;
+        font-size: 15px;
+        transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
+        cursor: pointer;
+    }
+
+    .hl-btn-secondary:hover {
+        background: var(--hl-bg);
+        border-color: var(--hl-primary);
+        transform: translateY(-1px);
+    }
+
+    /* Botones icono cuadrados (48x48) para touch */
+    .hl-btn-icon {
+        width: 48px;
+        height: 48px;
+        min-height: 48px;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--hl-line);
+        background: var(--hl-surface);
+        color: var(--hl-text);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        transition: all 160ms ease;
+        cursor: pointer;
+    }
+
+    .hl-btn-icon:hover {
+        background: var(--hl-bg);
+        border-color: var(--hl-primary);
+        transform: translateY(-1px);
+    }
+
+    /* ===== INPUTS ===== */
+    .hl-input, .hl-select, .hl-textarea {
+        min-height: 48px;
+        padding: 12px 16px;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--hl-line);
+        background: var(--hl-surface);
+        color: var(--hl-text);
+        font-size: 15px;
+        font-family: inherit;
+        transition: border-color 160ms ease, box-shadow 160ms ease;
+    }
+
+    .hl-input:focus, .hl-select:focus, .hl-textarea:focus {
+        border-color: var(--hl-primary);
+        outline: none;
+        box-shadow: 0 0 0 3px var(--hl-primary-light);
+    }
+
+    /* ===== NAVEGACIÓN ===== */
+    .hl-nav-active {
+        background: var(--hl-primary) !important;
+        color: #fff !important;
+    }
+
+    /* ===== ANIMACIONES ===== */
+    @keyframes pop {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.03); }
+        100% { transform: scale(1); }
+    }
+
+    .animate-pop {
+        animation: pop 0.3s ease;
+    }
+
+    @keyframes slideIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .animate-slide-in {
+        animation: slideIn 0.3s ease;
+    }
+
+    /* ===== SCROLLBAR PERSONALIZADO ===== */
+    ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: rgba(0, 0, 0, 0.15);
+        border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: rgba(0, 0, 0, 0.25);
+    }
+
+    .dark ::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.15);
+    }
+
+    .dark ::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.25);
+    }
+
+    /* ===== ACCESIBILIDAD ===== */
+    @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+            scroll-behavior: auto !important;
+            transition-duration: 0.01ms !important;
+            animation-duration: 0.01ms !important;
         }
-        .hl-card {
-            background: var(--hl-surface);
-            border: 1px solid var(--hl-line);
-            border-radius: 18px;
-            box-shadow: 0 8px 24px rgba(42, 67, 57, 0.06);
-        }
-        .hl-card-subtle { box-shadow: 0 4px 14px rgba(42, 67, 57, 0.04); }
-        .hl-btn-primary {
-            min-height: 44px;
-            border-radius: 12px;
-            background: var(--hl-primary);
-            color: #fff;
-            font-weight: 700;
-            box-shadow: 0 5px 12px rgba(66, 105, 90, 0.18);
-            transition: transform 160ms ease, background 160ms ease, box-shadow 160ms ease;
-        }
-        .hl-btn-primary:hover {
-            background: var(--hl-primary-hover);
-            transform: translateY(-1px);
-            box-shadow: 0 7px 16px rgba(66, 105, 90, 0.24);
-        }
-        .hl-btn-secondary {
-            min-height: 44px;
-            border: 1px solid var(--hl-line);
-            border-radius: 12px;
-            background: var(--hl-surface);
-            color: var(--hl-text);
-            font-weight: 700;
-            transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
-        }
-        .hl-btn-secondary:hover { background: var(--hl-bg); transform: translateY(-1px); }
-        .hl-input, .hl-select, .hl-textarea {
-            min-height: 46px;
-            border-radius: 12px;
-            border: 1px solid var(--hl-line);
-            background: var(--hl-surface);
-            color: var(--hl-text);
-        }
-        .hl-input:focus, .hl-select:focus, .hl-textarea:focus {
-            border-color: var(--hl-primary);
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(66, 105, 90, 0.13);
-        }
-        .hl-nav-active { background: var(--hl-primary) !important; color: #fff !important; }
-        @media (prefers-reduced-motion: reduce) {
-            *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; }
-        }
-    </style>
+    }
+</style>
 </head>
 <body class="h-full transition-colors">
     <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[60] focus:rounded-md focus:bg-white focus:px-4 focus:py-2 focus:text-indigo-700 focus:shadow">Saltar al contenido principal</a>
@@ -161,56 +311,98 @@
         <section id="view-dashboard" class="hl-shell hidden flex flex-1 flex-col">
             <!-- Cabecera del dashboard: identidad, navegación y acciones quedan en una sola fila adaptable. -->
             <header class="hl-header grid grid-cols-1 items-center gap-3 px-4 py-3 sm:px-6 sm:py-4 lg:grid-cols-[minmax(0,1fr)_auto]">
-                <!-- En móvil se separan identidad, navegación y acciones para evitar que los controles se junten. -->
-                <div class="flex min-w-0 flex-col gap-3 md:flex-row md:items-center md:gap-5">
-                    <!-- La fila superior móvil prioriza el título y coloca el modo nocturno junto a él. -->
-                    <div class="flex w-full items-center gap-3">
-                        <!-- Espacio reservado para el logo: sustituir el SVG por la imagen definitiva sin cambiar la estructura. -->
-                        <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#42695a] text-white shadow-sm" aria-label="Logo de HabitLink">
-                            <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                <path d="M8.5 12.5 12 16l7-7" />
-                                <path d="M21 12a9 9 0 1 1-3.1-6.8" />
-                            </svg>
-                        </div>
-                        <div class="min-w-0">
-                            <h1 class="text-xl font-bold leading-tight text-gray-800 dark:text-gray-100">HabitLink</h1>
-                            <p class="truncate text-sm text-gray-500 dark:text-gray-300" id="user-greeting">Cargando usuario...</p>
-                        </div>
-                        <div class="ml-auto flex h-11 items-center gap-2 rounded-xl border border-[#dde4e0] bg-[#f7f9f8] px-2 dark:border-[#38433e] dark:bg-[#171c1a] sm:hidden">
-                            <button id="btn-theme-toggle-mobile" type="button" role="switch" aria-label="Activar modo nocturno" aria-checked="false" title="Activar modo nocturno" class="relative h-8 w-14 shrink-0 rounded-full bg-[#cbd4cf] shadow-inner transition-colors focus:outline-none focus:ring-2 focus:ring-[#42695a] focus:ring-offset-2 dark:focus:ring-offset-[#171c1a]">
-                                <span data-theme-thumb-mobile class="absolute left-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-white text-xs shadow-md transition-transform duration-200" aria-hidden="true">
-                                    <span data-theme-icon-mobile>🌙</span>
-                                </span>
-                            </button>
-                        </div>
-                    </div>
-                    <nav class="grid grid-cols-2 rounded-xl border border-[#dde4e0] bg-[#edf1ef] p-1 dark:border-[#38433e] dark:bg-[#171c1a] md:flex md:w-auto" aria-label="Secciones principales">
-                        <button id="nav-dashboard" type="button" aria-current="page" class="hl-nav-active min-h-10 rounded-lg px-4 py-2 text-sm font-bold transition-all focus:outline-none focus:ring-2 focus:ring-[#42695a]">Mis hábitos</button>
-                        <button id="nav-stats" type="button" class="min-h-10 rounded-lg px-4 py-2 text-sm font-bold text-[#69736f] transition-all hover:text-[#202624] focus:outline-none focus:ring-2 focus:ring-[#42695a] dark:text-[#abb6b0] dark:hover:text-white">Mi progreso</button>
-                    </nav>
-                </div>
-                <div class="grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-2 sm:flex sm:flex-wrap sm:justify-end sm:gap-3">
-                    <button id="btn-add-habit" type="button" class="hl-btn-primary min-w-0 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#42695a] focus:ring-offset-2"><span aria-hidden="true">＋</span><span class="ml-1 sm:hidden">Nuevo</span><span class="hidden sm:inline"> Nuevo hábito</span></button>
-                    <!-- Interruptor de tema: su estado visual se sincroniza desde js/app.js. -->
-                    <!-- Control separado visualmente para que contraste con las acciones principales. -->
-                    <div class="hidden h-11 items-center gap-2 rounded-xl border border-[#dde4e0] bg-[#f7f9f8] px-2.5 dark:border-[#38433e] dark:bg-[#171c1a] sm:flex sm:ml-2 sm:px-3">
-                        <span class="hidden text-xs font-bold text-[#69736f] dark:text-[#abb6b0] xl:block">Noche</span>
-                        <button id="btn-theme-toggle" type="button" role="switch" aria-label="Activar modo nocturno" aria-checked="false" title="Activar modo nocturno" class="relative h-8 w-14 shrink-0 rounded-full bg-[#cbd4cf] shadow-inner transition-colors focus:outline-none focus:ring-2 focus:ring-[#42695a] focus:ring-offset-2 dark:focus:ring-offset-[#171c1a]">
-                            <span data-theme-thumb class="absolute left-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-white text-xs shadow-md transition-transform duration-200" aria-hidden="true">
-                                <span data-theme-icon>🌙</span>
-                            </span>
-                        </button>
-                    </div>
-                    <button id="btn-enable-notifications" type="button" title="Activar notificaciones" aria-label="Activar notificaciones" class="hl-btn-secondary flex min-h-11 min-w-11 items-center justify-center px-2 text-sm text-[#69736f] sm:min-w-0 sm:px-4 dark:text-[#abb6b0]">
-                        <span aria-hidden="true">🔔</span>
-                        <span class="hidden sm:ml-2 sm:inline">Activar</span>
-                    </button>
-                    <button id="btn-logout" type="button" aria-label="Cerrar sesión" title="Cerrar sesión" class="hl-btn-secondary flex min-h-11 min-w-11 items-center justify-center px-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#42695a] sm:min-w-0 sm:px-4">
-                        <span aria-hidden="true" class="sm:hidden">↪</span>
-                        <span class="hidden sm:inline">Salir</span>
-                    </button>
-                </div>
-            </header>
+    <!-- En móvil se separan identidad, navegación y acciones para evitar que los controles se junten. -->
+    <div class="flex min-w-0 flex-col gap-3 md:flex-row md:items-center md:gap-5">
+        <!-- La fila superior móvil prioriza el título y coloca el modo nocturno junto a él. -->
+        <div class="flex w-full items-center gap-3">
+            <!-- Logo con color primario dinámico -->
+            <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-white shadow-md" 
+                 style="background: var(--hl-primary);" 
+                 aria-label="Logo de HabitLink">
+                <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M8.5 12.5 12 16l7-7" />
+                    <path d="M21 12a9 9 0 1 1-3.1-6.8" />
+                </svg>
+            </div>
+            <div class="min-w-0">
+                <h1 class="text-xl font-bold leading-tight" style="color: var(--hl-text);">HabitLink</h1>
+                <p class="truncate text-sm" style="color: var(--hl-muted);" id="user-greeting">Cargando usuario...</p>
+            </div>
+            <!-- Switch de tema móvil -->
+            <div class="ml-auto flex h-11 items-center gap-2 rounded-xl border px-2 sm:hidden"
+                 style="border-color: var(--hl-line); background: var(--hl-bg);">
+                <button id="btn-theme-toggle-mobile" type="button" role="switch" aria-label="Activar modo nocturno" aria-checked="false" title="Activar modo nocturno" 
+                        class="relative h-8 w-14 shrink-0 rounded-full shadow-inner transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2"
+                        style="background: var(--hl-line); --tw-ring-color: var(--hl-primary);">
+                    <span data-theme-thumb-mobile class="absolute left-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-white text-xs shadow-md transition-transform duration-200" aria-hidden="true">
+                        <span data-theme-icon-mobile>🌙</span>
+                    </span>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Navegación Dashboard / Estadísticas -->
+        <nav class="grid grid-cols-2 rounded-xl border p-1 md:flex md:w-auto" 
+             style="border-color: var(--hl-line); background: var(--hl-bg);" 
+             aria-label="Secciones principales">
+            <button id="nav-dashboard" type="button" aria-current="page" 
+                    class="hl-nav-active min-h-10 rounded-lg px-4 py-2 text-sm font-bold transition-all focus:outline-none focus:ring-2"
+                    style="--tw-ring-color: var(--hl-primary);">
+                Mis hábitos
+            </button>
+            <button id="nav-stats" type="button" 
+                    class="min-h-10 rounded-lg px-4 py-2 text-sm font-bold transition-all hover:opacity-80 focus:outline-none focus:ring-2"
+                    style="color: var(--hl-muted); --tw-ring-color: var(--hl-primary);"
+                    onmouseover="this.style.color='var(--hl-text)'" 
+                    onmouseout="if(!this.classList.contains('hl-nav-active'))this.style.color='var(--hl-muted)'">
+                Mi progreso
+            </button>
+        </nav>
+    </div>
+    
+    <!-- Acciones principales -->
+    <div class="grid grid-cols-[minmax(0,1fr)_auto_auto_auto] items-center gap-2 sm:flex sm:flex-wrap sm:justify-end sm:gap-3">
+        <!-- Botón Añadir Hábito (primario) -->
+        <button id="btn-add-habit" type="button" 
+                class="hl-btn-primary min-w-0 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-offset-2"
+                style="--tw-ring-color: var(--hl-primary);">
+            <span aria-hidden="true">＋</span>
+            <span class="ml-1 sm:hidden">Nuevo</span>
+            <span class="hidden sm:inline"> Nuevo hábito</span>
+        </button>
+        
+        <!-- Switch de tema desktop -->
+        <div class="hidden h-11 items-center gap-2 rounded-xl border px-2.5 sm:flex sm:ml-2 sm:px-3"
+             style="border-color: var(--hl-line); background: var(--hl-bg);">
+            <span class="hidden text-xs font-bold xl:block" style="color: var(--hl-muted);">Noche</span>
+            <button id="btn-theme-toggle" type="button" role="switch" aria-label="Activar modo nocturno" aria-checked="false" title="Activar modo nocturno" 
+                    class="relative h-8 w-14 shrink-0 rounded-full shadow-inner transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2"
+                    style="background: var(--hl-line); --tw-ring-color: var(--hl-primary);">
+                <span data-theme-thumb class="absolute left-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-white text-xs shadow-md transition-transform duration-200" aria-hidden="true">
+                    <span data-theme-icon>🌙</span>
+                </span>
+            </button>
+        </div>
+        
+        <!-- Botón Notificaciones (icono) -->
+        <button id="btn-enable-notifications" type="button" 
+                title="Activar notificaciones" 
+                aria-label="Activar notificaciones" 
+                class="hl-btn-icon"
+                style="border-color: var(--hl-line); background: var(--hl-surface); color: var(--hl-text);">
+            <span aria-hidden="true">🔔</span>
+        </button>
+        
+        <!-- Botón Salir (icono) -->
+        <button id="btn-logout" type="button" 
+                aria-label="Cerrar sesión" 
+                title="Cerrar sesión" 
+                class="hl-btn-icon focus:outline-none focus:ring-2"
+                style="border-color: var(--hl-line); background: var(--hl-surface); color: var(--hl-text); --tw-ring-color: var(--hl-danger);">
+            <span aria-hidden="true">🚪</span>
+        </button>
+    </div>
+</header>
 
             <!-- Tarjeta de insignias separada: conserva una superficie limpia sin competir con el header. -->
             <!-- Insignias en una sola superficie suave: celebran el logro sin ocupar espacio visual constantemente. -->
@@ -309,10 +501,14 @@
                         </div>
                     </section>
                     <div id="habits-error" class="mb-4 hidden rounded-md bg-red-50 p-3 text-sm text-red-700 dark:bg-red-950 dark:text-red-200" role="alert"></div>
-                    <div class="mb-4 grid gap-3 sm:grid-cols-2">
-                        <p id="daily-summary" class="rounded-lg bg-white p-4 text-sm font-medium text-gray-700 shadow dark:bg-gray-800 dark:text-gray-200">0 de 0 hábitos diarios completados hoy</p>
-                        <p id="weekly-summary" class="rounded-lg bg-white p-4 text-sm font-medium text-gray-700 shadow dark:bg-gray-800 dark:text-gray-200">0 de 0 hábitos semanales completados esta semana</p>
-                    </div>
+                    <div id="daily-summary" class="card-hover rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-600 p-6 text-white shadow-md">
+    <p class="text-xs font-medium uppercase tracking-wider opacity-80">Hoy</p>
+    <p class="text-2xl font-bold mt-1">0 de 0 hábitos diarios</p>
+</div>
+<div id="weekly-summary" class="card-hover rounded-2xl bg-gradient-to-br from-purple-500 to-purple-600 p-6 text-white shadow-md">
+    <p class="text-xs font-medium uppercase tracking-wider opacity-80">Esta semana</p>
+    <p class="text-2xl font-bold mt-1">0 de 0 hábitos semanales</p>
+</div>
                     <div id="habits-list" class="grid gap-4 sm:grid-cols-2" aria-live="polite"></div>
                     <div id="empty-state" class="hl-card hidden py-12 text-center" role="status">
                         <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[#e9f0ec] text-2xl">🌱</div>

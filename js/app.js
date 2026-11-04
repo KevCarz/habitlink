@@ -189,33 +189,39 @@ document.getElementById('stats-back-dashboard')?.addEventListener('click', () =>
     const themeColor = document.querySelector('meta[name="theme-color"]');
 
     function updateThemeControl(isDark) {
-        // Ambos interruptores representan el mismo estado: uno junto al título en móvil
-        // y otro separado dentro de las acciones del header en escritorio.
-        [
-            {
-                button: themeToggle,
-                thumb: '[data-theme-thumb]',
-                icon: '[data-theme-icon]'
-            },
-            {
-                button: themeToggleMobile,
-                thumb: '[data-theme-thumb-mobile]',
-                icon: '[data-theme-icon-mobile]'
-            }
-        ].forEach(control => {
-            if (!control.button) return;
-            const thumb = control.button.querySelector(control.thumb);
-            const icon = control.button.querySelector(control.icon);
-            thumb?.classList.toggle('translate-x-6', isDark);
-            if (icon) icon.textContent = isDark ? '☀️' : '🌙';
-            control.button.style.backgroundColor = isDark ? '#42695a' : '#cbd4cf';
-            control.button.setAttribute('aria-label', isDark ? 'Activar modo diurno' : 'Activar modo nocturno');
-            control.button.setAttribute('aria-checked', String(isDark));
-            control.button.title = isDark ? 'Activar modo diurno' : 'Activar modo nocturno';
-        });
-        themeColor?.setAttribute('content', isDark ? '#111827' : '#f9fafb');
+    // Actualizar iconos y labels
+    const iconSpan = document.querySelector('[data-theme-icon]');
+    const iconMobileSpan = document.querySelector('[data-theme-icon-mobile]');
+    if (iconSpan) iconSpan.textContent = isDark ? '☀️' : '🌙';
+    if (iconMobileSpan) iconMobileSpan.textContent = isDark ? '☀️' : '🌙';
+
+    // Actualizar atributos ARIA
+    const themeToggle = document.getElementById('btn-theme-toggle');
+    const themeToggleMobile = document.getElementById('btn-theme-toggle-mobile');
+    if (themeToggle) {
+        themeToggle.setAttribute('aria-label', isDark ? 'Activar modo diurno' : 'Activar modo nocturno');
+        themeToggle.setAttribute('aria-checked', String(isDark));
+        themeToggle.title = isDark ? 'Activar modo diurno' : 'Activar modo nocturno';
+    }
+    if (themeToggleMobile) {
+        themeToggleMobile.setAttribute('aria-checked', String(isDark));
     }
 
+    // Mover el thumb del switch (de izquierda a derecha)
+    const thumb = document.querySelector('[data-theme-thumb]');
+    const thumbMobile = document.querySelector('[data-theme-thumb-mobile]');
+    if (thumb) thumb.style.transform = isDark ? 'translateX(24px)' : 'translateX(0)';
+    if (thumbMobile) thumbMobile.style.transform = isDark ? 'translateX(24px)' : 'translateX(0)';
+
+    // Cambiar color de fondo del switch según el tema
+    const switchBg = isDark ? 'var(--hl-primary)' : 'var(--hl-line)';
+    if (themeToggle) themeToggle.style.background = switchBg;
+    if (themeToggleMobile) themeToggleMobile.style.background = switchBg;
+
+    // Actualizar meta theme-color del navegador
+    const themeColor = document.querySelector('meta[name="theme-color"]');
+    if (themeColor) themeColor.setAttribute('content', isDark ? '#0f1117' : '#f8f9fc');
+}
     updateThemeControl(document.documentElement.classList.contains('dark'));
     const toggleTheme = () => {
         const isDark = document.documentElement.classList.toggle('dark');
