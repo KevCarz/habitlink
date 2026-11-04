@@ -75,7 +75,7 @@ function clearHabitError() {
 
 function showHabitFormMessage(message, isError = false) {
     habitMessage.textContent = message;
-    habitMessage.className = `text-center text-sm ${isError ? 'text-red-600 dark:text-red-300' : 'text-green-600 dark:text-green-300'}`;
+    habitMessage.className = `text-center text-sm ${isError ? 'text-red-600 dark:text-red-300' : 'text-[#42695a] dark:text-[#91b8a7]'}`;
     habitMessage.classList.remove('hidden');
     clearTimeout(habitMessageTimeout);
     habitMessageTimeout = setTimeout(() => habitMessage.classList.add('hidden'), 3500);
@@ -185,7 +185,7 @@ async function loadHabits() {
         const isCompleted = logsByHabit[habitId]?.has(dateStr);
         
         const bgClass = isCompleted 
-            ? 'bg-green-500 dark:bg-green-600 hover:bg-green-600 dark:hover:bg-green-500' 
+            ? 'bg-[#668c7b] dark:bg-[#91b8a7] hover:bg-[#42695a] dark:hover:bg-[#b2ccbf]' 
             : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600';
         
         const dayName = d.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric' });
@@ -202,7 +202,7 @@ async function loadHabits() {
         
         const card = document.createElement('article');
 // Tarjeta con elevación, borde lateral de estado y animación pop al completar
-card.className = `hl-card hl-card-subtle p-6 transition-all ${isCompleted ? 'animate-pop ring-1' : ''} ${isCompleted ? 'ring-green-500/30' : ''}`;
+card.className = `hl-card hl-card-subtle p-6 transition-all ${isCompleted ? 'animate-pop ring-1' : ''} ${isCompleted ? 'ring-[#91b8a7]/30' : ''}`;
 // Borde lateral que indica el estado
 card.style.borderLeft = `4px solid ${isCompleted ? 'var(--hl-success)' : 'var(--hl-primary)'}`;
 
@@ -214,33 +214,32 @@ card.innerHTML = `
             </h3>
             ${habit.description ? `<p class="text-sm mt-1" style="color: var(--hl-muted);">${escapeHTML(habit.description)}</p>` : ''}
         </div>
-        <span class="shrink-0 rounded-full px-3 py-1.5 text-xs font-bold ${isWeekly ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300' : 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300'}">
+        <span class="shrink-0 rounded-full px-3 py-1.5 text-xs font-bold ${isWeekly ? 'bg-[#eee9f5] text-[#705d8a] dark:bg-[#3a3247] dark:text-[#d9ccec]' : 'bg-[#edf1ef] text-[#42695a] dark:bg-[#314238] dark:text-[#b9d0c4]'}">
             ${isWeekly ? 'Semanal' : 'Diario'}
         </span>
     </div>
     
     ${generateHeatmap(habit.id)}
     
-    <div class="mt-4 flex items-center justify-between gap-3 pt-4" style="border-top: 1px solid var(--hl-line);">
+    <div class="mt-4 flex flex-wrap items-center justify-between gap-3 pt-4" style="border-top: 1px solid var(--hl-line);">
         <span class="text-sm font-medium" style="color: var(--hl-muted);">
-             <span style="color: var(--hl-accent); font-weight: 700;">${habit.streak_count || 0}</span> días
+             <span style="color: var(--hl-accent); font-weight: 700;">${habit.streak_count || 0}</span> ${isWeekly ? 'semanas' : 'días'}
         </span>
-        <div class="flex gap-2">
+        <div class="flex flex-wrap justify-end gap-2">
             <button type="button" data-action="toggle" data-habit-id="${escapeHTML(habit.id)}" data-frequency="${isWeekly ? 'weekly' : 'daily'}" data-completed="${isCompleted}" 
-                    class="hl-btn-primary ${isCompleted ? 'hl-btn-secondary' : ''}"
-                    style="${isCompleted ? '' : 'background: var(--hl-success); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);'}">
-                ${isCompleted ? 'Desmarcar' : '✓ Marcar'}
+                    class="${isCompleted ? 'hl-btn-secondary' : 'hl-btn-primary'} px-4 text-sm">
+                ${isCompleted ? 'Desmarcar' : '✓ Hecho'}
             </button>
             <button type="button" data-action="edit" data-habit-id="${escapeHTML(habit.id)}" 
                     class="hl-btn-icon" 
                     style="border-color: var(--hl-line); background: var(--hl-primary-light); color: var(--hl-primary);"
-                    aria-label="Editar hábito">
+                    aria-label="Editar hábito" title="Editar hábito">
                 ✏️
             </button>
             <button type="button" data-action="delete" data-habit-id="${escapeHTML(habit.id)}" 
                     class="hl-btn-icon" 
                     style="border-color: var(--hl-line); background: rgba(239, 68, 68, 0.1); color: var(--hl-danger);"
-                    aria-label="Eliminar hábito">
+                    aria-label="Eliminar hábito" title="Eliminar hábito">
                 🗑
             </button>
         </div>
@@ -349,13 +348,13 @@ async function loadYearlyHeatmap() {
         if (count === 0) {
             colorClass = 'bg-gray-200 dark:bg-gray-700';
         } else if (count <= 2) {
-            colorClass = 'bg-green-200 dark:bg-green-900';
+            colorClass = 'bg-[#dce7e1] dark:bg-[#314238]';
         } else if (count <= 4) {
-            colorClass = 'bg-green-400 dark:bg-green-700';
+            colorClass = 'bg-[#adc5ba] dark:bg-[#526f61]';
         } else if (count <= 6) {
-            colorClass = 'bg-green-600 dark:bg-green-500';
+            colorClass = 'bg-[#668c7b] dark:bg-[#668c7b]';
         } else {
-            colorClass = 'bg-green-800 dark:bg-green-300';
+            colorClass = 'bg-[#42695a] dark:bg-[#91b8a7]';
         }
 
         const cell = document.createElement('div');
@@ -476,9 +475,9 @@ async function loadWeeklyCharts() {
         
         return `
             <div class="flex items-center gap-3">
-                <span class="w-20 text-xs font-medium ${isToday ? 'text-indigo-600 dark:text-indigo-400 font-bold' : 'text-gray-600 dark:text-gray-400'}">${day}</span>
+                <span class="w-20 text-xs font-medium ${isToday ? 'text-[#42695a] dark:text-[#91b8a7] font-bold' : 'text-gray-600 dark:text-gray-400'}">${day}</span>
                 <div class="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                    <div class="h-full ${pct === 100 ? 'bg-green-500' : pct >= 50 ? 'bg-indigo-500' : 'bg-gray-400'} rounded-full transition-all duration-500" style="width: ${pct}%"></div>
+                    <div class="h-full ${pct === 100 ? 'bg-[#668c7b]' : pct >= 50 ? 'bg-[#42695a]' : 'bg-[#9aa49f]'} rounded-full transition-all duration-500" style="width: ${pct}%"></div>
                 </div>
                 <span class="w-10 text-right text-xs font-semibold text-gray-700 dark:text-gray-300">${pct}%</span>
             </div>
@@ -650,7 +649,11 @@ habitsList.addEventListener('click', async event => {
     if (!button) return;
 
     button.disabled = true;
-    try {
+     const originalButtonText = button.textContent.trim();
+     if (button.dataset.action === 'toggle') {
+         button.textContent = 'Guardando...';
+     }
+     try {
         if (button.dataset.action === 'toggle') {
             await toggleHabit(button.dataset.habitId, button.dataset.frequency, button.dataset.completed === 'true');
         } else if (button.dataset.action === 'edit') {
@@ -674,6 +677,9 @@ habitsList.addEventListener('click', async event => {
         showHabitError('No se pudo completar la acción.');
     } finally {
         button.disabled = false;
+        if (button.dataset.action === 'toggle') {
+            button.textContent = originalButtonText;
+        }
     }
 });
 

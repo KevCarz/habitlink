@@ -16,7 +16,7 @@ let isResetPasswordMode = false;
 
 function showAuthMessage(message, isError = false) {
     authMessage.textContent = message;
-    authMessage.className = `text-center text-sm ${isError ? 'text-red-600 dark:text-red-300' : 'text-green-600 dark:text-green-300'}`;
+    authMessage.className = `text-center text-sm ${isError ? 'text-red-600 dark:text-red-300' : 'text-[#42695a] dark:text-[#91b8a7]'}`;
     authMessage.classList.remove('hidden');
 }
 
@@ -30,11 +30,11 @@ function setAuthMode(loginMode) {
     tabLogin.setAttribute('aria-selected', String(loginMode));
     tabRegister.setAttribute('aria-selected', String(!loginMode));
     tabLogin.className = loginMode
-        ? 'min-h-11 flex-1 border-b-2 border-indigo-600 px-2 text-center text-sm font-medium text-indigo-600'
+        ? 'min-h-11 flex-1 border-b-2 border-[#42695a] px-2 text-center text-sm font-medium text-[#42695a] dark:border-[#91b8a7] dark:text-[#91b8a7]'
         : 'min-h-11 flex-1 px-2 text-center text-sm font-medium text-gray-500 hover:text-gray-700';
     tabRegister.className = loginMode
-        ? 'min-h-11 flex-1 px-2 text-center text-sm font-medium text-gray-500 hover:text-gray-700'
-        : 'min-h-11 flex-1 border-b-2 border-indigo-600 px-2 text-center text-sm font-medium text-indigo-600';
+        ? 'min-h-11 flex-1 px-2 text-center text-sm font-medium text-gray-500 hover:text-gray-700 dark:text-gray-300'
+        : 'min-h-11 flex-1 border-b-2 border-[#42695a] px-2 text-center text-sm font-medium text-[#42695a] dark:border-[#91b8a7] dark:text-[#91b8a7]';
     usernameField.classList.toggle('hidden', loginMode);
     usernameInput.required = !loginMode;
     passwordInput.autocomplete = loginMode ? 'current-password' : 'new-password';

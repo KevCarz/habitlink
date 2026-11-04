@@ -17,7 +17,7 @@ let searchSequence = 0;
 
 function showPartnerMessage(message, isError = false) {
     partnerMessage.textContent = message;
-    partnerMessage.className = `text-center text-sm ${isError ? 'text-red-600 dark:text-red-300' : 'text-green-600 dark:text-green-300'}`;
+    partnerMessage.className = `text-center text-sm ${isError ? 'text-red-600 dark:text-red-300' : 'text-[#42695a] dark:text-[#91b8a7]'}`;
     partnerMessage.classList.remove('hidden');
 }
 
@@ -75,7 +75,7 @@ searchUsername.addEventListener('input', () => {
         searchResults.innerHTML = users.map(user => `
             <div class="flex items-center justify-between gap-3 rounded-md bg-gray-50 p-3 dark:bg-gray-700">
                 <span class="font-medium text-gray-700 dark:text-gray-100">${escapeHTML(user.username)}</span>
-                <button type="button" data-action="send-request" data-user-id="${escapeHTML(user.id)}" class="shrink-0 rounded bg-indigo-600 px-3 py-1 text-sm text-white hover:bg-indigo-700">Enviar solicitud</button>
+                <button type="button" data-action="send-request" data-user-id="${escapeHTML(user.id)}" class="shrink-0 rounded-lg bg-[#42695a] px-3 py-2 text-sm font-semibold text-white hover:bg-[#355747] disabled:opacity-60">Enviar solicitud</button>
             </div>`).join('');
     }, 250);
 });
@@ -160,7 +160,7 @@ async function loadPartners() {
             const username = profileById.get(userId)?.username || 'Usuario';
             return `
                 <div class="flex items-center gap-3 rounded-xl border border-[#dde4e0] bg-[#f7f9f8] p-3 dark:border-[#38433e] dark:bg-[#171c1a]">
-                    <div class="flex h-8 w-8 items-center justify-center rounded-full bg-green-500 text-sm font-bold text-white">${escapeHTML(username.charAt(0).toUpperCase())}</div>
+                    <div class="flex h-8 w-8 items-center justify-center rounded-full bg-[#668c7b] text-sm font-bold text-white">${escapeHTML(username.charAt(0).toUpperCase())}</div>
                     <div class="flex-1">
                         <p class="font-medium text-gray-800 dark:text-gray-100">${escapeHTML(username)}</p>
                         <p class="text-xs font-bold text-[#42695a] dark:text-[#91b8a7]">Conectados</p>
@@ -174,7 +174,7 @@ async function loadPartners() {
         ...pendingReceived.map(partnership => {
             const username = profileById.get(partnership.user_1)?.username || 'Usuario';
             return `
-                <div class="flex items-center justify-between gap-2 rounded-md border border-yellow-200 bg-yellow-50 p-3 dark:border-yellow-800 dark:bg-yellow-950">
+                <div class="flex items-center justify-between gap-2 rounded-md border border-[#dde4e0] bg-[#f7f9f8] p-3 dark:border-[#38433e] dark:bg-[#171c1a]">
                     <div>
                         <p class="font-medium text-gray-800 dark:text-gray-100">${escapeHTML(username)}</p>
                         <p class="text-xs text-gray-500 dark:text-gray-300">Quiere ser tu compañero</p>
@@ -282,20 +282,20 @@ async function loadPartnerProgress(activePartnerships, profileById) {
                     <div>
                         <div class="mb-1 flex justify-between text-xs">
                             <span class="text-gray-600 dark:text-gray-300">Hoy: ${completedDaily}/${dailyHabits.length} diarios</span>
-                            <span class="font-semibold text-indigo-600">${dailyPercentage}%</span>
+                            <span class="font-semibold text-[#42695a] dark:text-[#91b8a7]">${dailyPercentage}%</span>
                         </div>
-                        <div class="h-2 w-full rounded bg-gray-200 dark:bg-gray-700"><div class="h-2 rounded bg-indigo-600" style="width: ${dailyPercentage}%"></div></div>
+                        <div class="h-2 w-full rounded bg-gray-200 dark:bg-gray-700"><div class="h-2 rounded bg-[#42695a] dark:bg-[#91b8a7]" style="width: ${dailyPercentage}%"></div></div>
                     </div>
                     <div>
                         <div class="mb-1 flex justify-between text-xs">
                             <span class="text-gray-600 dark:text-gray-300">Esta semana: ${completedWeekly}/${weeklyHabits.length} semanales</span>
-                            <span class="font-semibold text-purple-600">${weeklyPercentage}%</span>
+                            <span class="font-semibold text-[#42695a] dark:text-[#91b8a7]">${weeklyPercentage}%</span>
                         </div>
-                        <div class="h-2 w-full rounded bg-gray-200 dark:bg-gray-700"><div class="h-2 rounded bg-purple-600" style="width: ${weeklyPercentage}%"></div></div>
+                        <div class="h-2 w-full rounded bg-gray-200 dark:bg-gray-700"><div class="h-2 rounded bg-[#668c7b] dark:bg-[#91b8a7]" style="width: ${weeklyPercentage}%"></div></div>
                     </div>
                     ${userHabits.length ? `<ul class="space-y-1 border-t border-gray-100 pt-2 dark:border-gray-700">${userHabits.map(habit => {
                         const completed = (habit.frequency === 'weekly' ? completedThisWeek : completedToday).has(habit.id);
-                        return `<li class="flex items-center gap-2 text-xs ${completed ? 'text-green-700 dark:text-green-300' : 'text-gray-600 dark:text-gray-300'}"><span>${completed ? '✓' : '○'}</span><span>${escapeHTML(habit.title)} <span class="text-gray-400 dark:text-gray-500">(${habit.frequency === 'weekly' ? 'semanal' : 'diario'})</span></span></li>`;
+                        return `<li class="flex items-center gap-2 text-xs ${completed ? 'text-[#42695a] dark:text-[#91b8a7]' : 'text-gray-600 dark:text-gray-300'}"><span>${completed ? '✓' : '○'}</span><span>${escapeHTML(habit.title)} <span class="text-gray-400 dark:text-gray-500">(${habit.frequency === 'weekly' ? 'semanal' : 'diario'})</span></span></li>`;
                     }).join('')}</ul>` : '<p class="text-xs text-gray-400 dark:text-gray-300">Aún no tiene hábitos.</p>'}
                 </div>
             </article>`;

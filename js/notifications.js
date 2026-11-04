@@ -21,19 +21,19 @@ function updateNotificationButton() {
         btn.innerHTML = '<span aria-hidden="true">🔔</span><span class="hidden sm:ml-2 sm:inline">Activadas</span>';
         btn.setAttribute('aria-label', 'Notificaciones activadas');
         btn.title = 'Notificaciones activadas';
-        btn.classList.add('bg-green-100', 'text-green-700', 'dark:bg-green-900/30', 'dark:text-green-400');
+        btn.classList.add('bg-[#edf3ef]', 'text-[#42695a]', 'dark:bg-[#26352f]', 'dark:text-[#91b8a7]');
         btn.disabled = true;
     } else if (notificationPermission === 'denied') {
         btn.innerHTML = '<span aria-hidden="true">🔕</span><span class="hidden sm:ml-2 sm:inline">Bloqueadas</span>';
         btn.setAttribute('aria-label', 'Notificaciones bloqueadas');
         btn.title = 'Notificaciones bloqueadas';
-        btn.classList.add('bg-red-100', 'text-red-700', 'dark:bg-red-900/30', 'dark:text-red-400');
+        btn.classList.add('bg-[#f4efed]', 'text-[#a34e42]', 'dark:bg-[#4a302c]', 'dark:text-[#efb6ac]');
         btn.disabled = true;
     } else {
         btn.innerHTML = '<span aria-hidden="true">🔔</span><span class="hidden sm:ml-2 sm:inline">Activar</span>';
         btn.setAttribute('aria-label', 'Activar notificaciones');
         btn.title = 'Activar notificaciones';
-        btn.classList.remove('bg-green-100', 'text-green-700', 'dark:bg-green-900/30', 'dark:text-green-400', 'bg-red-100', 'text-red-700', 'dark:bg-red-900/30', 'dark:text-red-400');
+        btn.classList.remove('bg-[#edf3ef]', 'text-[#42695a]', 'dark:bg-[#26352f]', 'dark:text-[#91b8a7]', 'bg-[#f4efed]', 'text-[#a34e42]', 'dark:bg-[#4a302c]', 'dark:text-[#efb6ac]');
         btn.disabled = false;
     }
 }

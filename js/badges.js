@@ -79,18 +79,18 @@ function showBadgeToast(badge) {
     toast.setAttribute('aria-live', 'polite');
     toast.className = `
         pointer-events-auto transform transition-all duration-500 ease-out translate-x-full opacity-0
-        bg-gradient-to-br from-yellow-400 via-orange-500 to-red-500 text-white p-6 rounded-2xl shadow-2xl 
-        border-2 border-yellow-300 flex items-center gap-5 min-w-[380px] max-w-md
+        bg-[#42695a] text-white p-5 rounded-xl shadow-lg
+        border border-[#355747] flex items-center gap-4 min-w-[280px] max-w-md
     `;
 
     toast.innerHTML = `
-        <div class="text-6xl animate-bounce drop-shadow-lg flex-shrink-0">${safeIcon}</div>
+        <div class="text-5xl flex-shrink-0">${safeIcon}</div>
         <div class="flex-1 min-w-0">
-            <p class="text-[10px] font-bold uppercase tracking-widest text-yellow-100 opacity-80 mb-1">
+            <p class="text-[10px] font-bold uppercase tracking-widest text-white/70 mb-1">
                 🎉 ¡Insignia Desbloqueada!
             </p>
-            <h4 class="text-2xl font-black leading-tight mb-2 drop-shadow-md">${safeName}</h4>
-            <p class="text-base font-medium text-yellow-50 leading-snug">
+            <h4 class="text-xl font-bold leading-tight mb-1">${safeName}</h4>
+            <p class="text-sm leading-snug text-white/90">
                 ${descriptionHTML}
             </p>
         </div>
@@ -132,7 +132,7 @@ async function loadBadges() {
         return `
             <div class="relative rounded-lg border-2 p-4 transition-all ${
                 isUnlocked 
-                    ? 'border-yellow-400 bg-yellow-50 dark:bg-yellow-900/20 dark:border-yellow-600 shadow-md' 
+                    ? 'border-[#b8cbbf] bg-[#edf3ef] dark:bg-[#26352f] dark:border-[#91b8a7] shadow-sm' 
                     : 'border-gray-200 bg-gray-50 dark:bg-gray-800 dark:border-gray-700 opacity-60 grayscale'
             }">
                 <div class="flex items-start gap-3">
@@ -140,7 +140,7 @@ async function loadBadges() {
                     <div class="flex-1 min-w-0">
                         <h4 class="font-bold text-sm text-gray-800 dark:text-gray-100">${escapeBadgeHTML(presentation.name)}</h4>
                         <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">${escapeBadgeHTML(presentation.description)}</p>
-                        <p class="text-xs mt-1 ${isUnlocked ? 'text-yellow-700 dark:text-yellow-400 font-semibold' : 'text-gray-400'}">
+                        <p class="text-xs mt-1 ${isUnlocked ? 'text-[#42695a] dark:text-[#91b8a7] font-semibold' : 'text-gray-400'}">
                             ${isUnlocked ? '✓ Desbloqueada' : '🔒 ' + escapeBadgeHTML(badge.requirement || 'Sigue adelante para desbloquearla')}
                         </p>
                     </div>

@@ -220,7 +220,7 @@ document.getElementById('stats-back-dashboard')?.addEventListener('click', () =>
 
     // Actualizar meta theme-color del navegador
     const themeColor = document.querySelector('meta[name="theme-color"]');
-    if (themeColor) themeColor.setAttribute('content', isDark ? '#0f1117' : '#f8f9fc');
+    if (themeColor) themeColor.setAttribute('content', isDark ? '#171c1a' : '#f7f8f6');
 }
     updateThemeControl(document.documentElement.classList.contains('dark'));
     const toggleTheme = () => {
