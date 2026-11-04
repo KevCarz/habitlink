@@ -17,6 +17,50 @@ function parseLocalDate(dateString) {
     return new Date(year, month - 1, day);
 }
 
+function addDays(dateString, days) {
+    const date = parseLocalDate(dateString);
+    date.setDate(date.getDate() + days);
+    return getLocalDateString(date);
+}
+
+function getHabitStreak(habit, logDates) {
+    const uniqueDates = new Set((logDates || []).filter(Boolean));
+    if (!uniqueDates.size) return 0;
+
+    const today = getLocalDateString();
+
+    if (habit.frequency === 'weekly') {
+        const currentWeek = getWeekStartDate();
+        const previousWeek = addDays(currentWeek, -7);
+        const hasWeekLog = week => Array.from(uniqueDates).some(date =>
+            date >= week && date <= addDays(week, 6)
+        );
+        let week = hasWeekLog(currentWeek)
+            ? currentWeek
+            : (hasWeekLog(previousWeek) ? previousWeek : null);
+        let streak = 0;
+
+        while (week) {
+            const weekEnd = addDays(week, 6);
+            const hasLog = Array.from(uniqueDates).some(date =>
+                date >= week && date <= weekEnd
+            );
+            if (!hasLog) break;
+            streak++;
+            week = addDays(week, -7);
+        }
+        return streak;
+    }
+
+    let day = uniqueDates.has(today) ? today : addDays(today, -1);
+    let streak = 0;
+    while (uniqueDates.has(day)) {
+        streak++;
+        day = addDays(day, -1);
+    }
+    return streak;
+}
+
 function showHabitError(message) {
     habitsError.textContent = message;
     habitsError.classList.remove('hidden');
@@ -70,10 +114,6 @@ async function loadHabits() {
     habitsList.replaceChildren();
     const today = getLocalDateString();
     
-    const fourteenDaysAgo = new Date();
-    fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 13);
-    const startDate = getLocalDateString(fourteenDaysAgo);
-
     if (!habits?.length) {
         dailySummary.textContent = '0 de 0 hábitos diarios completados hoy';
         weeklySummary.textContent = '0 de 0 hábitos semanales completados';
@@ -85,9 +125,7 @@ async function loadHabits() {
     const { data: logs, error: logsError } = await supabaseClient
         .from('habit_logs')
         .select('habit_id, log_date')
-        .in('habit_id', habits.map(habit => habit.id))
-        .gte('log_date', startDate)
-        .lte('log_date', today);
+        .in('habit_id', habits.map(habit => habit.id));
 
     if (logsError) {
         console.error('Error cargando registros:', logsError);
@@ -101,6 +139,27 @@ async function loadHabits() {
         if (!logsByHabit[log.habit_id]) logsByHabit[log.habit_id] = new Set();
         logsByHabit[log.habit_id].add(log.log_date);
     });
+
+    const streakUpdates = [];
+    for (const habit of habits) {
+        const streak = getHabitStreak(habit, Array.from(logsByHabit[habit.id] || []));
+        if ((habit.streak_count || 0) !== streak) {
+            streakUpdates.push(
+                supabaseClient
+                    .from('habits')
+                    .update({ streak_count: streak })
+                    .eq('id', habit.id)
+                    .eq('user_id', user.id)
+            );
+            habit.streak_count = streak;
+        }
+    }
+    const updateResults = await Promise.all(streakUpdates);
+    const updateError = updateResults.find(result => result?.error)?.error;
+    if (updateError) {
+        console.error('Error actualizando rachas:', updateError);
+        showHabitError('No se pudieron guardar todas las rachas.');
+    }
 
     const weekStart = getWeekStartDate();
     const completedToday = new Set(habitLogs.filter(log => log.log_date === today).map(log => log.habit_id));

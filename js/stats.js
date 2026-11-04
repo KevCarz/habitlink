@@ -46,22 +46,41 @@ async function loadStats() {
     let maxStreak = 0;
     habits.forEach(habit => {
         const habitLogs = [...new Set(logs.filter(l => l.habit_id === habit.id).map(l => l.log_date))].sort();
-        let currentStreak = 1;
-        for (let i = 1; i < habitLogs.length; i++) {
-            const prev = parseLocalDate(habitLogs[i-1]);
-            const curr = parseLocalDate(habitLogs[i]);
-            const diffTime = Math.abs(curr - prev);
-            const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
-            
-            if (diffDays === 1) {
-                currentStreak++;
-                if (currentStreak > maxStreak) maxStreak = currentStreak;
-            } else {
-                currentStreak = 1;
+        if (!habitLogs.length) return;
+
+        let current = 1;
+        let longest = 1;
+        if (habit.frequency === 'weekly') {
+            const weekKeys = habitLogs.map(value => {
+                const date = parseLocalDate(value);
+                return getWeekStartDate(date);
+            });
+            const uniqueWeeks = [...new Set(weekKeys)].sort();
+            current = 1;
+            longest = 1;
+            for (let i = 1; i < uniqueWeeks.length; i++) {
+                const diffDays = Math.round((parseLocalDate(uniqueWeeks[i]) - parseLocalDate(uniqueWeeks[i - 1])) / 86400000);
+                if (diffDays === 7) {
+                    current++;
+                    longest = Math.max(longest, current);
+                } else {
+                    current = 1;
+                }
+            }
+        } else {
+            for (let i = 1; i < habitLogs.length; i++) {
+                const prev = parseLocalDate(habitLogs[i - 1]);
+                const curr = parseLocalDate(habitLogs[i]);
+                const diffDays = Math.round((curr - prev) / 86400000);
+                if (diffDays === 1) {
+                    current++;
+                    longest = Math.max(longest, current);
+                } else {
+                    current = 1;
+                }
             }
         }
-        // Si solo tiene 1 log, la racha es 1
-        if (habitLogs.length === 1 && maxStreak === 0) maxStreak = 1;
+        maxStreak = Math.max(maxStreak, longest);
     });
     document.getElementById('stat-longest-streak').textContent = `${maxStreak} días`;
 
