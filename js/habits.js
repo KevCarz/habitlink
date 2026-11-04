@@ -10,6 +10,8 @@ const habitSubmitBtn = document.getElementById('habit-submit-btn');
 
 let habitRealtimeChannel = null;
 let habitMessageTimeout = null;
+let comparisonContext = null;
+let comparisonPartnerSelectionBound = false;
 
 // Convierte una fecha YYYY-MM-DD sin desplazarla al día anterior por UTC.
 function parseLocalDate(dateString) {
@@ -404,6 +406,7 @@ async function loadWeeklyCharts() {
     const dailyHabitIds = new Set(dailyHabits.map(habit => habit.id));
     const weeklyHabitIds = new Set(weeklyHabits.map(habit => habit.id));
     const completedWeeklyIds = new Set();
+    const completedDailyOccurrences = new Set();
     const totalPerDay = dailyHabits.length;
 
     // Contar solo hábitos diarios en las barras; los semanales cuentan una vez por semana.
@@ -412,13 +415,19 @@ async function loadWeeklyCharts() {
         let dayIndex = logDate.getDay() - 1;
         if (dayIndex < 0) dayIndex = 6;
 
-        if (dailyHabitIds.has(log.habit_id)) daysCompleted[dayIndex]++;
+        if (dailyHabitIds.has(log.habit_id)) {
+            const occurrenceKey = `${log.habit_id}:${log.log_date}`;
+            if (!completedDailyOccurrences.has(occurrenceKey)) {
+                completedDailyOccurrences.add(occurrenceKey);
+                daysCompleted[dayIndex]++;
+            }
+        }
         if (weeklyHabitIds.has(log.habit_id)) completedWeeklyIds.add(log.habit_id);
     });
 
     const elapsedDays = Math.min(7, Math.round((parseLocalDate(getLocalDateString()) - weekStart) / 86400000) + 1);
     const totalPossible = (totalPerDay * elapsedDays) + weeklyHabits.length;
-    const totalCompleted = daysCompleted.reduce((a, b) => a + b, 0) + completedWeeklyIds.size;
+    const totalCompleted = completedDailyOccurrences.size + completedWeeklyIds.size;
     const weeklyPct = totalPossible > 0 ? Math.min(100, Math.round((totalCompleted / totalPossible) * 100)) : 0;
     document.getElementById('weekly-percentage').textContent = `${weeklyPct}%`;
     document.getElementById('my-weekly-pct').textContent = `${weeklyPct}%`;
@@ -442,35 +451,67 @@ async function loadWeeklyCharts() {
     }).join('');
 
     // Cargar comparativa con compañero
-    await loadPartnerComparison(user.id, weekStartStr, weekEndStr, weeklyPct);
+    comparisonContext = { userId: user.id, weekStartStr, weekEndStr, myWeeklyPct: weeklyPct };
+    await loadPartnerComparison(comparisonContext.userId, weekStartStr, weekEndStr, weeklyPct);
 }
 
 async function loadPartnerComparison(userId, weekStartStr, weekEndStr, myWeeklyPct) {
-    // Buscar compañero activo
-    const { data: partnership } = await supabaseClient
+    const comparisonDiv = document.getElementById('partner-comparison');
+    const selector = document.getElementById('partner-selector');
+    if (!comparisonDiv || !selector) return;
+
+    if (!comparisonPartnerSelectionBound) {
+        selector.addEventListener('change', () => {
+            if (!comparisonContext) return;
+            loadPartnerComparison(
+                comparisonContext.userId,
+                comparisonContext.weekStartStr,
+                comparisonContext.weekEndStr,
+                comparisonContext.myWeeklyPct
+            );
+        });
+        comparisonPartnerSelectionBound = true;
+    }
+
+    const { data: partnerships, error: partnershipsError } = await supabaseClient
         .from('partnerships')
         .select('user_1, user_2')
         .eq('status', 'active')
-        .or(`user_1.eq.${userId},user_2.eq.${userId}`)
-        .limit(1)
-        .maybeSingle();
+        .or(`user_1.eq.${userId},user_2.eq.${userId}`);
 
-    const comparisonDiv = document.getElementById('partner-comparison');
-    if (!comparisonDiv) return;
-    
-    if (!partnership) {
+    if (partnershipsError) {
+        console.error('Error cargando compañeros para la comparativa:', partnershipsError);
         comparisonDiv.classList.add('hidden');
         return;
     }
 
-    const partnerId = partnership.user_1 === userId ? partnership.user_2 : partnership.user_1;
+    const partnerIds = [...new Set((partnerships || []).map(partnership =>
+        partnership.user_1 === userId ? partnership.user_2 : partnership.user_1
+    ))];
 
-    // Obtener nombre del compañero
-    const { data: partner } = await supabaseClient
+    if (!partnerIds.length) {
+        selector.replaceChildren(new Option('Sin compañeros activos', ''));
+        comparisonDiv.classList.add('hidden');
+        return;
+    }
+
+    const { data: profiles } = await supabaseClient
         .from('profiles')
-        .select('username')
-        .eq('id', partnerId)
-        .single();
+        .select('id, username')
+        .in('id', partnerIds);
+    const profileById = new Map((profiles || []).map(profile => [profile.id, profile]));
+
+    const currentSelection = selector.value;
+    selector.innerHTML = '';
+    partnerIds.forEach(partnerId => {
+        const username = profileById.get(partnerId)?.username || 'Usuario';
+        selector.add(new Option(username, partnerId));
+    });
+    if (partnerIds.includes(currentSelection)) selector.value = currentSelection;
+
+    const partnerId = selector.value || partnerIds[0];
+    selector.value = partnerId;
+    const partnerName = profileById.get(partnerId)?.username || 'Compañero';
 
     // Obtener hábitos del compañero
     const { data: partnerHabits } = await supabaseClient
@@ -479,9 +520,9 @@ async function loadPartnerComparison(userId, weekStartStr, weekEndStr, myWeeklyP
         .eq('user_id', partnerId);
 
     if (!partnerHabits?.length) {
-        document.getElementById('partner-label').textContent = partner?.username || 'Compañero';
+        document.getElementById('partner-label').textContent = partnerName;
         document.getElementById('partner-weekly-pct').textContent = '0%';
-        document.getElementById('comparison-message').textContent = 'Tu compañero aún no tiene hábitos';
+        document.getElementById('comparison-message').textContent = `${partnerName} aún no tiene hábitos`;
         comparisonDiv.classList.remove('hidden');
         return;
     }
@@ -494,25 +535,29 @@ async function loadPartnerComparison(userId, weekStartStr, weekEndStr, myWeeklyP
         .gte('log_date', weekStartStr)
         .lte('log_date', weekEndStr);
 
-    const dailyPartnerHabits = partnerHabits.filter(habit => habit.frequency === 'daily').length;
+    const dailyPartnerHabits = partnerHabits.filter(habit => habit.frequency === 'daily');
     const weeklyPartnerHabits = partnerHabits.filter(habit => habit.frequency === 'weekly');
     const weeklyPartnerIds = new Set(weeklyPartnerHabits.map(habit => habit.id));
     const dailyPartnerIds = new Set(partnerHabits.filter(habit => habit.frequency === 'daily').map(habit => habit.id));
     const completedPartnerWeeklyIds = new Set();
     let partnerDailyTotal = 0;
+    const completedDailyPartnerOccurrences = new Set();
 
     (partnerLogs ?? []).forEach(log => {
-        if (dailyPartnerIds.has(log.habit_id)) partnerDailyTotal++;
+        if (dailyPartnerIds.has(log.habit_id)) {
+            completedDailyPartnerOccurrences.add(`${log.habit_id}:${log.log_date}`);
+        }
         if (weeklyPartnerIds.has(log.habit_id)) completedPartnerWeeklyIds.add(log.habit_id);
     });
+    partnerDailyTotal = completedDailyPartnerOccurrences.size;
 
     const elapsedDays = Math.min(7, Math.round((parseLocalDate(getLocalDateString()) - parseLocalDate(weekStartStr)) / 86400000) + 1);
-    const partnerPossible = (dailyPartnerHabits * elapsedDays) + weeklyPartnerIds.size;
+    const partnerPossible = (dailyPartnerHabits.length * elapsedDays) + weeklyPartnerIds.size;
     const partnerTotal = partnerDailyTotal + completedPartnerWeeklyIds.size;
     const partnerPct = partnerPossible > 0 ? Math.min(100, Math.round((partnerTotal / partnerPossible) * 100)) : 0;
 
     // Actualizar UI
-    document.getElementById('partner-label').textContent = partner?.username || 'Compañero';
+    document.getElementById('partner-label').textContent = partnerName;
     document.getElementById('partner-weekly-pct').textContent = `${partnerPct}%`;
     
     // Mensaje comparativo

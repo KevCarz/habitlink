@@ -217,6 +217,9 @@ requestsList.addEventListener('click', async event => {
 });
 
 async function loadPartnerProgress(activePartnerships, profileById) {
+    if (typeof loadWeeklyCharts === 'function') {
+        await loadWeeklyCharts();
+    }
     if (!activePartnerships.length) {
         partnerProgress.classList.add('hidden');
         partnerHabits.replaceChildren();
