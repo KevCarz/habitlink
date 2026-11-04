@@ -115,6 +115,22 @@ async function handleSignedOut() {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
+    const dailyResetCountdown = document.getElementById('daily-reset-countdown');
+    const updateDailyResetCountdown = () => {
+        if (!dailyResetCountdown) return;
+        const now = new Date();
+        const nextMidnight = new Date(now);
+        nextMidnight.setHours(24, 0, 0, 0);
+        const remainingSeconds = Math.max(0, Math.floor((nextMidnight - now) / 1000));
+        const hours = Math.floor(remainingSeconds / 3600);
+        const minutes = Math.floor((remainingSeconds % 3600) / 60);
+        const seconds = remainingSeconds % 60;
+        dailyResetCountdown.textContent =
+            `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    };
+    updateDailyResetCountdown();
+    setInterval(updateDailyResetCountdown, 1000);
+
     // --- NAVEGACIÓN DASHBOARD / ESTADÍSTICAS ---
 const navDashboard = document.getElementById('nav-dashboard');
 const navStats = document.getElementById('nav-stats');

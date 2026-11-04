@@ -297,9 +297,14 @@ async function loadYearlyHeatmap() {
     // Crear grid: 7 filas (días de la semana) x 53 columnas (semanas)
     const grid = document.createElement('div');
     grid.className = 'grid gap-1';
-    grid.style.gridTemplateRows = 'repeat(7, 12px)';
     grid.style.gridAutoFlow = 'column';
-    grid.style.gridAutoColumns = '12px';
+
+    const cellSize = window.innerWidth < 640 ? 10 : 12;
+    const extraVerticalSpace = Math.min(112, Math.max(0, (habits.length - 1) * 5));
+    const rowSize = cellSize + Math.round(extraVerticalSpace / 7);
+    grid.style.gridTemplateRows = `repeat(7, ${rowSize}px)`;
+    grid.style.gridAutoColumns = `${rowSize}px`;
+    grid.style.width = 'max-content';
 
     // Alinear al lunes como primer día
     const firstDayOfWeek = startDate.getDay(); // 0=Dom, 1=Lun...
@@ -308,7 +313,8 @@ async function loadYearlyHeatmap() {
     // Días vacíos al inicio para alinear con el día de la semana correcto
     for (let i = 0; i < offset; i++) {
         const empty = document.createElement('div');
-        empty.className = 'h-3 w-3';
+        empty.style.width = `${rowSize}px`;
+        empty.style.height = `${rowSize}px`;
         grid.appendChild(empty);
     }
 
@@ -333,7 +339,9 @@ async function loadYearlyHeatmap() {
         }
 
         const cell = document.createElement('div');
-        cell.className = `h-3 w-3 rounded-sm ${colorClass} cursor-pointer transition-transform hover:scale-125`;
+        cell.className = `rounded-sm ${colorClass} cursor-pointer transition-transform hover:scale-125`;
+        cell.style.width = `${rowSize}px`;
+        cell.style.height = `${rowSize}px`;
         cell.title = `${dateStr}: ${count} hábito(s) completado(s)`;
         grid.appendChild(cell);
 
@@ -341,6 +349,13 @@ async function loadYearlyHeatmap() {
     }
 
     heatmapContainer.appendChild(grid);
+
+    const scrollContainer = document.getElementById('yearly-heatmap-scroll');
+    if (scrollContainer) {
+        requestAnimationFrame(() => {
+            scrollContainer.scrollLeft = scrollContainer.scrollWidth;
+        });
+    }
 }
 
 async function loadWeeklyCharts() {
@@ -794,3 +809,13 @@ window.subscribeToRealtime = subscribeToRealtime;
 window.unsubscribeHabitRealtime = unsubscribeHabitRealtime;
 window.loadYearlyHeatmap = loadYearlyHeatmap;
 window.loadWeeklyCharts = loadWeeklyCharts;
+
+let yearlyHeatmapResizeTimeout = null;
+window.addEventListener('resize', () => {
+    clearTimeout(yearlyHeatmapResizeTimeout);
+    yearlyHeatmapResizeTimeout = setTimeout(() => {
+        if (document.getElementById('view-dashboard')?.classList.contains('flex')) {
+            loadYearlyHeatmap();
+        }
+    }, 200);
+});
