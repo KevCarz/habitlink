@@ -248,6 +248,7 @@ card.innerHTML = `
 `;
 
 habitsList.appendChild(card);
+    }
 
     // Mantener sincronizadas la lista, el mapa anual y las gráficas semanales.
     await Promise.all([loadYearlyHeatmap(), loadWeeklyCharts()]);
