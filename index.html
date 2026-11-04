@@ -190,12 +190,6 @@
                     </nav>
                 </div>
                 <div class="grid grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-2 sm:flex sm:flex-wrap sm:justify-end sm:gap-3">
-                    <div class="hidden items-end rounded-lg border border-[#dde4e0] bg-[#f7f9f8] px-3 py-1.5 text-right dark:border-[#38433e] dark:bg-[#171c1a] md:flex">
-                        <div>
-                            <p class="text-[10px] font-semibold leading-tight text-[#69736f] dark:text-[#abb6b0]">Los hábitos diarios se reiniciarán en:</p>
-                            <p id="daily-reset-countdown" class="mt-0.5 font-mono text-sm font-bold tabular-nums text-[#42695a] dark:text-[#91b8a7]" aria-live="polite">00:00:00</p>
-                        </div>
-                    </div>
                     <button id="btn-add-habit" type="button" class="hl-btn-primary min-w-0 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#42695a] focus:ring-offset-2"><span aria-hidden="true">＋</span><span class="ml-1 sm:hidden">Nuevo</span><span class="hidden sm:inline"> Nuevo hábito</span></button>
                     <!-- Interruptor de tema: su estado visual se sincroniza desde js/app.js. -->
                     <!-- Control separado visualmente para que contraste con las acciones principales. -->
@@ -253,7 +247,13 @@
                             <p class="text-xs font-bold uppercase tracking-[0.16em] text-[#69736f] dark:text-[#abb6b0]">Tu día</p>
                             <h2 id="habits-heading" class="mt-1 text-2xl font-black tracking-tight">Mis hábitos</h2>
                         </div>
-                        <button type="button" onclick="document.getElementById('btn-add-habit').click()" class="hl-btn-primary hidden px-4 sm:inline-flex sm:items-center">＋ Añadir</button>
+                        <div class="flex items-center gap-2">
+                            <div class="rounded-lg border border-[#dde4e0] bg-[#f7f9f8] px-3 py-1.5 text-right dark:border-[#38433e] dark:bg-[#171c1a]">
+                                <p class="text-[10px] font-semibold leading-tight text-[#69736f] dark:text-[#abb6b0]">Los hábitos diarios se reiniciarán en:</p>
+                                <p id="daily-reset-countdown" class="mt-0.5 font-mono text-sm font-bold tabular-nums text-[#42695a] dark:text-[#91b8a7]" aria-live="polite">00:00:00</p>
+                            </div>
+                            <button type="button" onclick="document.getElementById('btn-add-habit').click()" class="hl-btn-primary hidden px-4 sm:inline-flex sm:items-center">＋ Añadir</button>
+                        </div>
                     </div>
                     <!-- Gráficas de cumplimiento semanal. Se mantienen separadas del mapa anual. -->
                     <section id="weekly-charts-container" class="hl-card hl-card-subtle mb-6 p-5" aria-labelledby="weekly-chart-heading">
