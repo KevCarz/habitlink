@@ -197,58 +197,107 @@ async function loadHabits() {
 };
 
     for (const habit of habits) {
+            // ✅ MEJORA #2: Ordenar hábitos (pendientes primero, completados al fondo)
+    habits.sort((a, b) => {
+        const isADone = (a.frequency === 'weekly' ? completedThisWeek : completedToday).has(a.id);
+        const isBDone = (b.frequency === 'weekly' ? completedThisWeek : completedToday).has(b.id);
+        return (isADone ? 1 : 0) - (isBDone ? 1 : 0);
+    });
+
+    // Función para generar el heatmap de 14 días
+    const generateHeatmap = (habitId) => {
+        let html = '<div class="mt-3 flex gap-1 justify-between" title="Actividad de los últimos 14 días">';
+        for (let i = 13; i >= 0; i--) {
+            const d = new Date();
+            d.setDate(d.getDate() - i);
+            const dateStr = getLocalDateString(d);
+            const isCompleted = logsByHabit[habitId]?.has(dateStr);
+            
+            const bgClass = isCompleted 
+                ? 'bg-green-500 dark:bg-green-500 hover:bg-green-600 dark:hover:bg-green-400' 
+                : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600';
+            
+            const dayName = d.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric' });
+            
+            html += `<div class="w-4 h-4 rounded-sm ${bgClass} transition-colors cursor-default" title="${dayName}: ${isCompleted ? 'Completado' : 'Pendiente'}"></div>`;
+        }
+        html += '</div>';
+        return html;
+    };
+
+    // ✅ BUCLE DE TARJETAS (con fuego, verde vivo y ordenamiento)
+    for (const habit of habits) {
         const isWeekly = habit.frequency === 'weekly';
         const isCompleted = (isWeekly ? completedThisWeek : completedToday).has(habit.id);
         
         const card = document.createElement('article');
-// Tarjeta con elevación, borde lateral de estado y animación pop al completar
-card.className = `hl-card hl-card-subtle p-6 transition-all ${isCompleted ? 'animate-pop ring-1' : ''} ${isCompleted ? 'ring-[#91b8a7]/30' : ''}`;
-// Borde lateral que indica el estado
-card.style.borderLeft = `4px solid ${isCompleted ? 'var(--hl-success)' : 'var(--hl-primary)'}`;
+        
+        // Tarjeta con estilo dinámico según estado
+        if (isCompleted) {
+            // Completado: fondo verde sutil, borde verde brillante, animación pop
+            card.className = 'hl-card p-6 transition-all animate-pop';
+            card.style.borderLeft = '4px solid var(--hl-success)';
+            card.style.background = 'linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, var(--hl-surface) 100%)';
+        } else {
+            // Pendiente: borde índigo, fondo normal, hover con elevación
+            card.className = 'hl-card p-6 transition-all hover:-translate-y-0.5';
+            card.style.borderLeft = '4px solid var(--hl-primary)';
+        }
 
-card.innerHTML = `
-    <div class="mb-3 flex items-start justify-between gap-3">
-        <div class="flex-1 min-w-0">
-            <h3 class="text-xl font-bold leading-tight ${isCompleted ? 'line-through opacity-50' : ''}" style="color: var(--hl-text);">
-                ${escapeHTML(habit.title)}
-            </h3>
-            ${habit.description ? `<p class="text-sm mt-1" style="color: var(--hl-muted);">${escapeHTML(habit.description)}</p>` : ''}
-        </div>
-        <span class="shrink-0 rounded-full px-3 py-1.5 text-xs font-bold ${isWeekly ? 'bg-[#eee9f5] text-[#705d8a] dark:bg-[#3a3247] dark:text-[#d9ccec]' : 'bg-[#edf1ef] text-[#42695a] dark:bg-[#314238] dark:text-[#b9d0c4]'}">
-            ${isWeekly ? 'Semanal' : 'Diario'}
-        </span>
-    </div>
-    
-    ${generateHeatmap(habit.id)}
-    
-    <div class="mt-4 flex flex-wrap items-center justify-between gap-3 pt-4" style="border-top: 1px solid var(--hl-line);">
-        <span class="text-sm font-medium" style="color: var(--hl-muted);">
-             <span style="color: var(--hl-accent); font-weight: 700;">${habit.streak_count || 0}</span> ${isWeekly ? 'semanas' : 'días'}
-        </span>
-        <div class="flex flex-wrap justify-end gap-2">
-            <button type="button" data-action="toggle" data-habit-id="${escapeHTML(habit.id)}" data-frequency="${isWeekly ? 'weekly' : 'daily'}" data-completed="${isCompleted}" 
-                    class="${isCompleted ? 'hl-btn-secondary' : 'hl-btn-primary'} px-4 text-sm">
-                ${isCompleted ? 'Desmarcar' : '✓ Hecho'}
-            </button>
-            <button type="button" data-action="edit" data-habit-id="${escapeHTML(habit.id)}" 
-                    class="hl-btn-icon" 
-                    style="border-color: var(--hl-line); background: var(--hl-primary-light); color: var(--hl-primary);"
-                    aria-label="Editar hábito" title="Editar hábito">
-                ✏️
-            </button>
-            <button type="button" data-action="delete" data-habit-id="${escapeHTML(habit.id)}" 
-                    class="hl-btn-icon" 
-                    style="border-color: var(--hl-line); background: rgba(239, 68, 68, 0.1); color: var(--hl-danger);"
-                    aria-label="Eliminar hábito" title="Eliminar hábito">
-                🗑
-            </button>
-        </div>
-    </div>
-`;
+        card.innerHTML = `
+            <div class="mb-3 flex items-start justify-between gap-3">
+                <div class="flex-1 min-w-0">
+                    <h3 class="text-xl font-bold leading-tight ${isCompleted ? 'line-through' : ''}" 
+                        style="color: ${isCompleted ? 'var(--hl-success)' : 'var(--hl-text)'};">
+                        ${escapeHTML(habit.title)}
+                    </h3>
+                    ${habit.description ? `<p class="text-sm mt-1" style="color: var(--hl-muted);">${escapeHTML(habit.description)}</p>` : ''}
+                </div>
+                <span class="shrink-0 rounded-full px-3 py-1.5 text-xs font-bold ${
+                    isWeekly 
+                        ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300' 
+                        : 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300'
+                }">
+                    ${isWeekly ? 'Semanal' : 'Diario'}
+                </span>
+            </div>
+            
+            ${generateHeatmap(habit.id)}
+            
+            <div class="mt-4 flex items-center justify-between gap-3 pt-4" style="border-top: 1px solid var(--hl-line);">
+                <!-- ✅ RACHA CON EMOJI 🔥 -->
+                <span class="text-sm font-medium flex items-center gap-1" style="color: var(--hl-muted);">
+                    <span class="text-lg">🔥</span>
+                    <span style="color: var(--hl-accent); font-weight: 700;">${habit.streak_count || 0}</span>
+                    <span>${isWeekly ? 'semanas' : 'días'}</span>
+                </span>
+                
+                <div class="flex gap-2">
+                    <!-- ✅ BOTÓN MARCAR: verde vivo con gradiente cuando está pendiente -->
+                    <button type="button" data-action="toggle" data-habit-id="${escapeHTML(habit.id)}" data-frequency="${isWeekly ? 'weekly' : 'daily'}" data-completed="${isCompleted}" 
+                            class="hl-btn-primary ${isCompleted ? 'hl-btn-secondary' : ''}"
+                            style="${isCompleted ? '' : 'background: linear-gradient(135deg, #10b981 0%, #059669 100%); box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4); color: white; border: none;'}">
+                        ${isCompleted ? 'Desmarcar' : '✓ Hecho'}
+                    </button>
+                    <button type="button" data-action="edit" data-habit-id="${escapeHTML(habit.id)}" 
+                            class="hl-btn-icon" 
+                            style="border-color: var(--hl-line); background: var(--hl-primary-light); color: var(--hl-primary);"
+                            aria-label="Editar hábito">
+                        ✏️
+                    </button>
+                    <button type="button" data-action="delete" data-habit-id="${escapeHTML(habit.id)}" 
+                            class="hl-btn-icon" 
+                            style="border-color: var(--hl-line); background: rgba(239, 68, 68, 0.1); color: var(--hl-danger);"
+                            aria-label="Eliminar hábito">
+                        🗑
+                    </button>
+                </div>
+            </div>
+        `;
 
-habitsList.appendChild(card);
+        habitsList.appendChild(card);
     }
-
+}
     // Mantener sincronizadas la lista, el mapa anual y las gráficas semanales.
     await Promise.all([loadYearlyHeatmap(), loadWeeklyCharts()]);
 }
