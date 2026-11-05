@@ -81,7 +81,10 @@ function showHabitFormMessage(message, isError = false) {
     habitMessageTimeout = setTimeout(() => habitMessage.classList.add('hidden'), 3500);
 }
 
-async function loadHabits() {
+let habitLoadRunning = false;
+let habitLoadRequested = false;
+
+async function renderHabits() {
     if (!supabaseClient) return;
     if (!habitsList || !emptyState || !dailySummary || !weeklySummary) return;
 
@@ -114,9 +117,10 @@ async function loadHabits() {
 
     clearHabitError();
     habitsList.replaceChildren();
+    const uniqueHabits = Array.from(new Map((habits ?? []).map(habit => [habit.id, habit])).values());
     const today = getLocalDateString();
     
-    if (!habits?.length) {
+    if (!uniqueHabits.length) {
         dailySummary.textContent = '0 de 0 hábitos diarios completados hoy';
         weeklySummary.textContent = '0 de 0 hábitos semanales completados';
         emptyState.classList.remove('hidden');
@@ -127,7 +131,7 @@ async function loadHabits() {
     const { data: logs, error: logsError } = await supabaseClient
         .from('habit_logs')
         .select('habit_id, log_date')
-        .in('habit_id', habits.map(habit => habit.id));
+        .in('habit_id', uniqueHabits.map(habit => habit.id));
 
     if (logsError) {
         console.error('Error cargando registros:', logsError);
@@ -143,7 +147,7 @@ async function loadHabits() {
     });
 
     const streakUpdates = [];
-    for (const habit of habits) {
+    for (const habit of uniqueHabits) {
         const streak = getHabitStreak(habit, Array.from(logsByHabit[habit.id] || []));
         if ((habit.streak_count || 0) !== streak) {
             streakUpdates.push(
@@ -169,8 +173,8 @@ async function loadHabits() {
         .filter(log => log.log_date >= weekStart && log.log_date <= today)
         .map(log => log.habit_id));
 
-    const dailyHabits = habits.filter(habit => habit.frequency === 'daily');
-    const weeklyHabits = habits.filter(habit => habit.frequency === 'weekly');
+    const dailyHabits = uniqueHabits.filter(habit => habit.frequency === 'daily');
+    const weeklyHabits = uniqueHabits.filter(habit => habit.frequency === 'weekly');
     
     dailySummary.textContent = `${dailyHabits.filter(h => completedToday.has(h.id)).length} de ${dailyHabits.length} hábitos diarios completados hoy`;
     weeklySummary.textContent = `${weeklyHabits.filter(h => completedThisWeek.has(h.id)).length} de ${weeklyHabits.length} hábitos semanales completados esta semana`;
@@ -190,64 +194,45 @@ async function loadHabits() {
         
         const dayName = d.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric' });
         
-        html += `<div class="w-4 h-4 rounded-sm ${bgClass} transition-colors cursor-default" title="${dayName}: ${isCompleted ? 'Completado' : 'Pendiente'}"></div>`;
+        html += `<div class="h-3 w-3 shrink-0 rounded-sm sm:h-4 sm:w-4 ${bgClass} transition-colors cursor-default" title="${dayName}: ${isCompleted ? 'Completado' : 'Pendiente'}"></div>`;
     }
     html += '</div>';
     return html;
 };
 
-    for (const habit of habits) {
             // ✅ MEJORA #2: Ordenar hábitos (pendientes primero, completados al fondo)
-    habits.sort((a, b) => {
+    uniqueHabits.sort((a, b) => {
         const isADone = (a.frequency === 'weekly' ? completedThisWeek : completedToday).has(a.id);
         const isBDone = (b.frequency === 'weekly' ? completedThisWeek : completedToday).has(b.id);
         return (isADone ? 1 : 0) - (isBDone ? 1 : 0);
     });
 
     // Función para generar el heatmap de 14 días
-    const generateHeatmap = (habitId) => {
-        let html = '<div class="mt-3 flex gap-1 justify-between" title="Actividad de los últimos 14 días">';
-        for (let i = 13; i >= 0; i--) {
-            const d = new Date();
-            d.setDate(d.getDate() - i);
-            const dateStr = getLocalDateString(d);
-            const isCompleted = logsByHabit[habitId]?.has(dateStr);
-            
-            const bgClass = isCompleted 
-                ? 'bg-green-500 dark:bg-green-500 hover:bg-green-600 dark:hover:bg-green-400' 
-                : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600';
-            
-            const dayName = d.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric' });
-            
-            html += `<div class="w-4 h-4 rounded-sm ${bgClass} transition-colors cursor-default" title="${dayName}: ${isCompleted ? 'Completado' : 'Pendiente'}"></div>`;
-        }
-        html += '</div>';
-        return html;
-    };
-
     // ✅ BUCLE DE TARJETAS (con fuego, verde vivo y ordenamiento)
-    for (const habit of habits) {
+    for (const habit of uniqueHabits) {
         const isWeekly = habit.frequency === 'weekly';
         const isCompleted = (isWeekly ? completedThisWeek : completedToday).has(habit.id);
         
         const card = document.createElement('article');
+        card.dataset.habitId = habit.id;
+        card.classList.add('min-w-0');
         
         // Tarjeta con estilo dinámico según estado
         if (isCompleted) {
             // Completado: fondo verde sutil, borde verde brillante, animación pop
-            card.className = 'hl-card p-6 transition-all animate-pop';
+            card.className = 'hl-card min-w-0 p-4 transition-all animate-pop sm:p-6';
             card.style.borderLeft = '4px solid var(--hl-success)';
             card.style.background = 'linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, var(--hl-surface) 100%)';
         } else {
             // Pendiente: borde índigo, fondo normal, hover con elevación
-            card.className = 'hl-card p-6 transition-all hover:-translate-y-0.5';
+            card.className = 'hl-card min-w-0 p-4 transition-all hover:-translate-y-0.5 sm:p-6';
             card.style.borderLeft = '4px solid var(--hl-primary)';
         }
 
         card.innerHTML = `
             <div class="mb-3 flex items-start justify-between gap-3">
                 <div class="flex-1 min-w-0">
-                    <h3 class="text-xl font-bold leading-tight ${isCompleted ? 'line-through' : ''}" 
+                    <h3 class="break-words text-lg font-bold leading-tight sm:text-xl ${isCompleted ? 'line-through' : ''}" 
                         style="color: ${isCompleted ? 'var(--hl-success)' : 'var(--hl-text)'};">
                         ${escapeHTML(habit.title)}
                     </h3>
@@ -264,7 +249,7 @@ async function loadHabits() {
             
             ${generateHeatmap(habit.id)}
             
-            <div class="mt-4 flex items-center justify-between gap-3 pt-4" style="border-top: 1px solid var(--hl-line);">
+            <div class="mt-4 flex flex-col items-stretch justify-between gap-3 pt-4 sm:flex-row sm:items-center" style="border-top: 1px solid var(--hl-line);">
                 <!-- ✅ RACHA CON EMOJI 🔥 -->
                 <span class="text-sm font-medium flex items-center gap-1" style="color: var(--hl-muted);">
                     <span class="text-lg">🔥</span>
@@ -272,7 +257,7 @@ async function loadHabits() {
                     <span>${isWeekly ? 'semanas' : 'días'}</span>
                 </span>
                 
-                <div class="flex gap-2">
+                <div class="flex flex-wrap justify-end gap-2">
                     <!-- ✅ BOTÓN MARCAR: verde vivo con gradiente cuando está pendiente -->
                     <button type="button" data-action="toggle" data-habit-id="${escapeHTML(habit.id)}" data-frequency="${isWeekly ? 'weekly' : 'daily'}" data-completed="${isCompleted}" 
                             class="hl-btn-primary ${isCompleted ? 'hl-btn-secondary' : ''}"
@@ -294,12 +279,27 @@ async function loadHabits() {
                 </div>
             </div>
         `;
-
+    
         habitsList.appendChild(card);
     }
-}
+
     // Mantener sincronizadas la lista, el mapa anual y las gráficas semanales.
     await Promise.all([loadYearlyHeatmap(), loadWeeklyCharts()]);
+}
+
+async function loadHabits() {
+    habitLoadRequested = true;
+    if (habitLoadRunning) return;
+
+    habitLoadRunning = true;
+    try {
+        while (habitLoadRequested) {
+            habitLoadRequested = false;
+            await renderHabits();
+        }
+    } finally {
+        habitLoadRunning = false;
+    }
 }
 
 async function loadYearlyHeatmap() {
