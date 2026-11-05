@@ -182,6 +182,84 @@
         transform: translateY(-1px);
     }
 
+    /* ===== BOTÓN DE NOTIFICACIONES ===== */
+    .notification-button {
+        position: relative;
+        overflow: visible;
+        transition: transform 180ms ease, background 180ms ease, border-color 180ms ease, box-shadow 180ms ease, color 180ms ease;
+    }
+
+    .notification-button .notification-icon {
+        width: 22px;
+        height: 22px;
+        transition: transform 180ms ease;
+    }
+
+    .notification-button[data-state="default"]:hover {
+        border-color: var(--hl-accent);
+        color: var(--hl-accent);
+        box-shadow: 0 0 0 4px color-mix(in srgb, var(--hl-accent) 12%, transparent);
+    }
+
+    .notification-button[data-state="default"]:active .notification-icon {
+        transform: rotate(-12deg) scale(0.92);
+    }
+
+    .notification-button[data-state="granted"] {
+        color: var(--hl-primary);
+        border-color: color-mix(in srgb, var(--hl-primary) 55%, var(--hl-line));
+        background: var(--hl-primary-light);
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--hl-primary) 14%, transparent);
+    }
+
+    .notification-button[data-state="granted"]::after {
+        content: "";
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        width: 7px;
+        height: 7px;
+        border-radius: 999px;
+        background: var(--hl-success);
+        box-shadow: 0 0 0 3px var(--hl-surface);
+        animation: notification-status-pulse 2.4s ease-out infinite;
+    }
+
+    .notification-button[data-state="granted"] .notification-icon {
+        animation: notification-bell 3.2s ease-in-out infinite;
+        transform-origin: 50% 12%;
+    }
+
+    .notification-button[data-state="denied"],
+    .notification-button[data-state="unsupported"] {
+        color: var(--hl-muted);
+        background: color-mix(in srgb, var(--hl-danger) 7%, var(--hl-surface));
+        border-color: color-mix(in srgb, var(--hl-danger) 25%, var(--hl-line));
+        cursor: not-allowed;
+        opacity: 0.78;
+    }
+
+    @keyframes notification-status-pulse {
+        0%, 65% { box-shadow: 0 0 0 3px var(--hl-surface); }
+        78% { box-shadow: 0 0 0 7px color-mix(in srgb, var(--hl-success) 0%, transparent); }
+        100% { box-shadow: 0 0 0 3px var(--hl-surface); }
+    }
+
+    @keyframes notification-bell {
+        0%, 82%, 100% { transform: rotate(0); }
+        86% { transform: rotate(8deg); }
+        90% { transform: rotate(-7deg); }
+        94% { transform: rotate(5deg); }
+        97% { transform: rotate(-3deg); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .notification-button[data-state="granted"]::after,
+        .notification-button[data-state="granted"] .notification-icon {
+            animation: none;
+        }
+    }
+
     /* ===== INPUTS ===== */
     .hl-input, .hl-select, .hl-textarea {
         min-height: 48px;
@@ -388,9 +466,13 @@
         <button id="btn-enable-notifications" type="button" 
                 title="Activar notificaciones" 
                 aria-label="Activar notificaciones" 
-                class="hl-btn-icon"
+                class="hl-btn-icon notification-button"
+                data-state="default"
                 style="border-color: var(--hl-line); background: var(--hl-surface); color: var(--hl-text);">
-            <span aria-hidden="true">🔔</span>
+            <svg class="notification-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/>
+                <path d="M10 21h4"/>
+            </svg>
         </button>
         
         <!-- Botón Salir (icono) -->
