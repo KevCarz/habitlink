@@ -272,31 +272,57 @@ async function loadPartnerProgress(activePartnerships, profileById) {
         const weeklyHabits = userHabits.filter(habit => habit.frequency === 'weekly');
         const completedDaily = dailyHabits.filter(habit => completedToday.has(habit.id)).length;
         const completedWeekly = weeklyHabits.filter(habit => completedThisWeek.has(habit.id)).length;
-        const dailyPercentage = dailyHabits.length ? Math.round(completedDaily / dailyHabits.length * 100) : 0;
+                const dailyPercentage = dailyHabits.length ? Math.round(completedDaily / dailyHabits.length * 100) : 0;
         const weeklyPercentage = weeklyHabits.length ? Math.round(completedWeekly / weeklyHabits.length * 100) : 0;
 
         return `
-            <article class="rounded-md border border-gray-200 p-3 dark:border-gray-600">
-                <h3 class="mb-3 font-semibold text-gray-800 dark:text-gray-100">${escapeHTML(username)}</h3>
+            <article class="hl-card hl-card-subtle p-4">
+                <h3 class="mb-3 font-bold text-lg" style="color: var(--hl-text);">${escapeHTML(username)}</h3>
                 <div class="space-y-3">
+                    <!-- Barra DIARIA: gradiente índigo → azul cielo -->
                     <div>
                         <div class="mb-1 flex justify-between text-xs">
-                            <span class="text-gray-600 dark:text-gray-300">Hoy: ${completedDaily}/${dailyHabits.length} diarios</span>
-                            <span class="font-semibold text-[#42695a] dark:text-[#91b8a7]">${dailyPercentage}%</span>
+                            <span style="color: var(--hl-muted);">Hoy: ${completedDaily}/${dailyHabits.length} diarios</span>
+                            <span class="font-bold" style="color: var(--hl-primary);">${dailyPercentage}%</span>
                         </div>
-                        <div class="h-2 w-full rounded bg-gray-200 dark:bg-gray-700"><div class="h-2 rounded bg-[#42695a] dark:bg-[#91b8a7]" style="width: ${dailyPercentage}%"></div></div>
+                        <div class="h-2.5 w-full rounded-full overflow-hidden" style="background: var(--hl-line);">
+                            <div class="h-full rounded-full transition-all duration-500" 
+                                 style="width: ${dailyPercentage}%; background: linear-gradient(90deg, var(--hl-primary) 0%, #60a5fa 100%); box-shadow: 0 0 10px rgba(79, 70, 229, 0.5);">
+                            </div>
+                        </div>
                     </div>
+                    
+                    <!-- Barra SEMANAL: gradiente púrpura → fucsia -->
                     <div>
                         <div class="mb-1 flex justify-between text-xs">
-                            <span class="text-gray-600 dark:text-gray-300">Esta semana: ${completedWeekly}/${weeklyHabits.length} semanales</span>
-                            <span class="font-semibold text-[#42695a] dark:text-[#91b8a7]">${weeklyPercentage}%</span>
+                            <span style="color: var(--hl-muted);">Esta semana: ${completedWeekly}/${weeklyHabits.length} semanales</span>
+                            <span class="font-bold" style="color: #a855f7;">${weeklyPercentage}%</span>
                         </div>
-                        <div class="h-2 w-full rounded bg-gray-200 dark:bg-gray-700"><div class="h-2 rounded bg-[#668c7b] dark:bg-[#91b8a7]" style="width: ${weeklyPercentage}%"></div></div>
+                        <div class="h-2.5 w-full rounded-full overflow-hidden" style="background: var(--hl-line);">
+                            <div class="h-full rounded-full transition-all duration-500" 
+                                 style="width: ${weeklyPercentage}%; background: linear-gradient(90deg, #a855f7 0%, #d946ef 100%); box-shadow: 0 0 10px rgba(168, 85, 247, 0.5);">
+                            </div>
+                        </div>
                     </div>
-                    ${userHabits.length ? `<ul class="space-y-1 border-t border-gray-100 pt-2 dark:border-gray-700">${userHabits.map(habit => {
-                        const completed = (habit.frequency === 'weekly' ? completedThisWeek : completedToday).has(habit.id);
-                        return `<li class="flex items-center gap-2 text-xs ${completed ? 'text-[#42695a] dark:text-[#91b8a7]' : 'text-gray-600 dark:text-gray-300'}"><span>${completed ? '✓' : '○'}</span><span>${escapeHTML(habit.title)} <span class="text-gray-400 dark:text-gray-500">(${habit.frequency === 'weekly' ? 'semanal' : 'diario'})</span></span></li>`;
-                    }).join('')}</ul>` : '<p class="text-xs text-gray-400 dark:text-gray-300">Aún no tiene hábitos.</p>'}
+                    
+                    <!-- Lista de hábitos -->
+                    ${userHabits.length ? `<ul class="space-y-1 pt-2" style="border-top: 1px solid var(--hl-line);">
+                        ${userHabits.map(habit => {
+                            const completed = (habit.frequency === 'weekly' ? completedThisWeek : completedToday).has(habit.id);
+                            return `<li class="flex items-center gap-2 text-xs ${
+                                completed 
+                                    ? 'font-medium' 
+                                    : ''
+                            }" style="color: ${completed ? 'var(--hl-success)' : 'var(--hl-muted)'};">
+                                <span>${completed ? '✓' : '○'}</span>
+                                <span>${escapeHTML(habit.title)} 
+                                    <span style="color: var(--hl-muted); opacity: 0.7;">
+                                        (${habit.frequency === 'weekly' ? 'semanal' : 'diario'})
+                                    </span>
+                                </span>
+                            </li>`;
+                        }).join('')}
+                    </ul>` : '<p class="text-xs" style="color: var(--hl-muted);">Aún no tiene hábitos.</p>'}
                 </div>
             </article>`;
     }).join('');

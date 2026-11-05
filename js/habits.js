@@ -344,18 +344,18 @@ async function loadYearlyHeatmap() {
         const count = countsByDate[dateStr] || 0;
         
         // Determinar color según cantidad
-        let colorClass;
-        if (count === 0) {
-            colorClass = 'bg-gray-200 dark:bg-gray-700';
-        } else if (count <= 2) {
-            colorClass = 'bg-[#dce7e1] dark:bg-[#314238]';
-        } else if (count <= 4) {
-            colorClass = 'bg-[#adc5ba] dark:bg-[#526f61]';
-        } else if (count <= 6) {
-            colorClass = 'bg-[#668c7b] dark:bg-[#668c7b]';
-        } else {
-            colorClass = 'bg-[#42695a] dark:bg-[#91b8a7]';
-        }
+     let colorClass;
+if (count === 0) {
+    colorClass = 'bg-gray-300 dark:bg-gray-700'; // Gris claro
+} else if (count <= 2) {
+    colorClass = 'bg-[#9be9a8] dark:bg-[#0e4429]'; // Verde claro GitHub
+} else if (count <= 4) {
+    colorClass = 'bg-[#40c463] dark:bg-[#216e39]'; // Verde medio GitHub
+} else if (count <= 6) {
+    colorClass = 'bg-[#30a14e] dark:bg-[#30a14e]'; // Verde fuerte GitHub
+} else {
+    colorClass = 'bg-[#216e39] dark:bg-[#39d353]'; // Verde oscuro GitHub (más vivo en dark)
+}
 
         const cell = document.createElement('div');
         cell.className = `rounded-sm ${colorClass} cursor-pointer transition-transform hover:scale-125`;
