@@ -479,16 +479,14 @@
         
         <!-- Botón Notificaciones (icono) -->
         <button id="btn-enable-notifications" type="button" 
-                title="Activar notificaciones" 
-                aria-label="Activar notificaciones" 
-                class="hl-btn-icon notification-button"
-                data-state="default"
-                style="border-color: var(--hl-line); background: var(--hl-surface); color: var(--hl-text);">
-            <svg class="notification-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/>
-                <path d="M10 21h4"/>
-            </svg>
-        </button>
+        title="Activar notificaciones" 
+        aria-label="Activar notificaciones" 
+        class="hl-btn-icon relative"
+        style="border-color: var(--hl-line); background: var(--hl-surface); color: var(--hl-muted);">
+    <span aria-hidden="true">🔔</span>
+    <!-- Indicador visual de estado -->
+    <span id="notif-status-dot" class="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-gray-400"></span>
+</button>
         
         <!-- Botón Salir (icono) -->
         <button id="btn-logout" type="button" 
@@ -733,11 +731,7 @@
                             <option value="weekly">Semanal (una vez por semana)</option>
                         </select>
                     </div>
-                    <div>
-                        <label for="habit-reminder" class="block text-sm font-medium" style="color: var(--hl-muted);">Hora de recordatorio (opcional)</label>
-                        <input type="time" id="habit-reminder" class="hl-input mt-1 w-full">
-                        <p class="mt-1 text-xs" style="color: var(--hl-muted);">Te avisaremos a esta hora si todavía falta completarlo.</p>
-                    </div>
+                    
                     <div id="habit-message" class="hidden text-center text-sm" role="status" aria-live="polite"></div>
                     <div class="flex justify-end gap-3 pt-2">
                         <button type="button" id="btn-cancel-habit" class="hl-btn-secondary px-5 text-sm">Cancelar</button>
