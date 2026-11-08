@@ -94,10 +94,11 @@ async function initializeAuthenticatedSession(session) {
     } catch (error) {
         console.error('Error iniciando la sesión:', error);
         showAppError('No se pudo cargar la aplicación. Inténtalo de nuevo.');
+        initReminders();
     } finally {
         initializationPromise = null;
     }
-    initReminders();
+    
 }
 
 async function handleSignedOut() {

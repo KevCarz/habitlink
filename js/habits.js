@@ -105,7 +105,7 @@ async function renderHabits() {
 
     const { data: habits, error } = await supabaseClient
         .from('habits')
-        .select('id, title, description, frequency, streak_count, created_at')
+        .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
@@ -259,7 +259,7 @@ async function renderHabits() {
                 
                 <div class="flex flex-wrap justify-end gap-2">
                     <!-- ✅ BOTÓN MARCAR: verde vivo con gradiente cuando está pendiente -->
-                    <button type="button" data-action="toggle" data-reminder="${habit.reminder_time || ''}" data-habit-id="${escapeHTML(habit.id)}" data-frequency="${isWeekly ? 'weekly' : 'daily'}" data-completed="${isCompleted}" 
+                    <button type="button" data-action="toggle" data-reminder="${habit.reminder_time || ''}" data-habit-title="${escapeHTML(habit.title)}" data-habit-id="${escapeHTML(habit.id)}" data-frequency="${isWeekly ? 'weekly' : 'daily'}" data-completed="${isCompleted}"
                             class="hl-btn-primary ${isCompleted ? 'hl-btn-secondary' : ''}"
                             style="${isCompleted ? '' : 'background: linear-gradient(135deg, #10b981 0%, #059669 100%); box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4); color: white; border: none;'}">
                         ${isCompleted ? 'Desmarcar' : '✓ Hecho'}
@@ -884,6 +884,8 @@ async function unsubscribeHabitRealtime() {
     }
 }
 
+let habitReminderInterval = null;
+
 function scheduleHabitReminders() {
     if (Notification.permission !== 'granted') return;
 
@@ -905,8 +907,68 @@ function scheduleHabitReminders() {
     });
 }
 
+function initReminders() {
+    clearInterval(habitReminderInterval);
+    scheduleHabitReminders();
+    habitReminderInterval = setInterval(scheduleHabitReminders, 30000);
+}
+
+// --- SISTEMA DE RECORDATORIOS POR HORA ---
+let reminderInterval = null;
+
+function startReminderChecker() {
+    // Limpiar intervalo anterior si existe
+    if (reminderInterval) clearInterval(reminderInterval);
+
+    // Revisar cada 30 segundos si hay algún recordatorio pendiente
+    reminderInterval = setInterval(() => {
+        if (Notification.permission !== 'granted') return;
+
+        const now = new Date();
+        const currentHours = String(now.getHours()).padStart(2, '0');
+        const currentMinutes = String(now.getMinutes()).padStart(2, '0');
+        const currentTime = `${currentHours}:${currentMinutes}`;
+
+        // Buscar todos los botones de hábitos que tengan recordatorio y NO estén completados
+        const pendingHabits = document.querySelectorAll('button[data-action="toggle"][data-reminder]:not([data-completed="true"])');
+
+        pendingHabits.forEach(btn => {
+            const reminderTime = btn.dataset.reminder;
+            const habitTitle = btn.closest('article').querySelector('h3').textContent;
+
+            // Si la hora actual coincide con la hora del recordatorio
+            if (reminderTime && reminderTime === currentTime) {
+                // Disparar notificación
+                const notification = new Notification('⏰ ¡Hora de tu hábito!', {
+                    body: `Aún no has marcado: "${habitTitle}"`,
+                    icon: 'https://cdn-icons-png.flaticon.com/512/2921/2921222.png',
+                    tag: `reminder-${btn.dataset.habitId}`, // Evita duplicados
+                    requireInteraction: true // Se queda en pantalla hasta que el usuario la cierre
+                });
+
+                // Opcional: reproducir un sonido suave (descomenta si quieres)
+                // const audio = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
+                // audio.play().catch(e => console.log('Audio bloqueado por el navegador'));
+
+                // Cambiar el atributo para no notificar de nuevo en el mismo minuto
+                btn.dataset.reminder = 'notified';
+            }
+        });
+    }, 30000); // Revisa cada 30 segundos
+}
+
+// Iniciar el checker cuando se cargan los hábitos
+function initReminders() {
+    if (Notification.permission === 'granted') {
+        startReminderChecker();
+    }
+}
+
+window.initReminders = initReminders;
+
 window.subscribeToRealtime = subscribeToRealtime;
 window.unsubscribeHabitRealtime = unsubscribeHabitRealtime;
+window.initReminders = initReminders;
 window.loadYearlyHeatmap = loadYearlyHeatmap;
 window.loadWeeklyCharts = loadWeeklyCharts;
 

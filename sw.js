@@ -1,4 +1,4 @@
-const CACHE_NAME = 'habitlink-v1.0.2';  // Cambia de v1.0.1 a v1.0.2
+const CACHE_NAME = 'habitlink-v1.0.3';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
@@ -7,6 +7,9 @@ const ASSETS_TO_CACHE = [
     './js/auth.js',
     './js/habits.js',
     './js/partners.js',
+    './js/stats.js',
+    './js/badges.js',
+    './js/notifications.js',
     './js/app.js',
     './manifest.json'
 ];

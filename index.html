@@ -115,6 +115,21 @@
         box-shadow: var(--shadow-sm);
     }
 
+    @media (prefers-reduced-motion: reduce) {
+        .hl-card {
+            transition: none;
+        }
+
+        .hl-card:hover {
+            transform: none;
+        }
+
+        .animate-pop,
+        .animate-slide-in {
+            animation: none;
+        }
+    }
+
     /* ===== BOTONES ===== */
     .hl-btn-primary {
         min-height: 48px;
@@ -702,10 +717,26 @@
                     </div>
                     <div>
                         <label for="habit-frequency" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Frecuencia</label>
+                        <div class="mb-4">
+    <label for="habit-reminder" class="block text-sm font-medium mb-1" style="color: var(--hl-muted);">
+        ⏰ Hora de recordatorio (opcional)
+    </label>
+    <input 
+        type="time" 
+        id="habit-reminder" 
+        class="hl-input w-full"
+    >
+    <p class="text-xs mt-1" style="color: var(--hl-muted);">Te avisaremos a esta hora si no lo has completado.</p>
+</div>
                         <select id="habit-frequency" class="hl-select mt-1 block w-full px-3 py-2 text-sm">
                             <option value="daily">Diario</option>
                             <option value="weekly">Semanal (una vez por semana)</option>
                         </select>
+                    </div>
+                    <div>
+                        <label for="habit-reminder" class="block text-sm font-medium" style="color: var(--hl-muted);">Hora de recordatorio (opcional)</label>
+                        <input type="time" id="habit-reminder" class="hl-input mt-1 w-full">
+                        <p class="mt-1 text-xs" style="color: var(--hl-muted);">Te avisaremos a esta hora si todavía falta completarlo.</p>
                     </div>
                     <div id="habit-message" class="hidden text-center text-sm" role="status" aria-live="polite"></div>
                     <div class="flex justify-end gap-3 pt-2">

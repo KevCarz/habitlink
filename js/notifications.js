@@ -27,19 +27,19 @@ function updateNotificationButton() {
         btn.setAttribute('aria-label', 'Notificaciones activadas');
         btn.title = 'Notificaciones activadas';
         btn.dataset.state = 'granted';
-        btn.disabled = true;
+        btn.disabled = false;
     } else if (notificationPermission === 'denied') {
         btn.innerHTML = mutedIcon;
         btn.setAttribute('aria-label', 'Notificaciones bloqueadas');
         btn.title = 'Notificaciones bloqueadas';
         btn.dataset.state = 'denied';
-        btn.disabled = true;
+        btn.disabled = false;
     } else if (notificationPermission === 'unsupported') {
         btn.innerHTML = mutedIcon;
         btn.setAttribute('aria-label', 'Notificaciones no compatibles');
         btn.title = 'Este navegador no admite notificaciones';
         btn.dataset.state = 'unsupported';
-        btn.disabled = true;
+        btn.disabled = false;
     } else {
         btn.innerHTML = bellIcon;
         btn.setAttribute('aria-label', 'Activar notificaciones');
@@ -50,14 +50,31 @@ function updateNotificationButton() {
 }
 
 async function requestNotificationPermission() {
-    if (!('Notification' in window) || notificationPermission === 'denied') return;
-    
+    if (!('Notification' in window)) {
+        notificationPermission = 'unsupported';
+        updateNotificationButton();
+        return;
+    }
+
+    if (notificationPermission === 'granted') {
+        sendNotification('HabitLink', 'Las notificaciones están funcionando correctamente.');
+        return;
+    }
+
+    if (notificationPermission === 'denied') {
+        const container = document.getElementById('toast-container');
+        if (container) {
+            container.insertAdjacentHTML('beforeend', '<div class="pointer-events-auto rounded-xl border border-[#efb6ac] bg-[#fff5f3] px-4 py-3 text-sm text-[#a34e42] shadow-lg dark:bg-[#3a2825] dark:text-[#efb6ac]">Las notificaciones están bloqueadas. Actívalas desde los ajustes del navegador.</div>');
+        }
+        return;
+    }
+
     const permission = await Notification.requestPermission();
     notificationPermission = permission;
     updateNotificationButton();
 
     if (permission === 'granted') {
-        sendNotification('¡Notificaciones activadas! 🎉', 'Te avisaremos cuando tu compañero complete un hábito.');
+        sendNotification('¡Notificaciones activadas! 🎉', 'Te avisaremos sobre tus hábitos y compañeros.');
     }
 }
 
@@ -65,7 +82,7 @@ function sendNotification(title, body) {
     if (notificationPermission !== 'granted') return;
 
     // Usar el icono de la app (puedes cambiar la URL por tu icono local si quieres)
-    const iconUrl = 'https://cdn-icons-png.flaticon.com/512/2921/2921222.png'; 
+    const iconUrl = './image/icon-192.png';
 
     const notification = new Notification(title, {
         body: body,
@@ -81,3 +98,4 @@ function sendNotification(title, body) {
 
 window.initNotifications = initNotifications;
 window.sendNotification = sendNotification;
+window.requestNotificationPermission = requestNotificationPermission;
