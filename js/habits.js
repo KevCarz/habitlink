@@ -259,7 +259,7 @@ async function renderHabits() {
                 
                 <div class="flex flex-wrap justify-end gap-2">
                     <!-- ✅ BOTÓN MARCAR: verde vivo con gradiente cuando está pendiente -->
-                    <button type="button" data-action="toggle" data-habit-id="${escapeHTML(habit.id)}" data-frequency="${isWeekly ? 'weekly' : 'daily'}" data-completed="${isCompleted}" 
+                    <button type="button" data-action="toggle" data-reminder="${habit.reminder_time || ''}" data-habit-id="${escapeHTML(habit.id)}" data-frequency="${isWeekly ? 'weekly' : 'daily'}" data-completed="${isCompleted}" 
                             class="hl-btn-primary ${isCompleted ? 'hl-btn-secondary' : ''}"
                             style="${isCompleted ? '' : 'background: linear-gradient(135deg, #10b981 0%, #059669 100%); box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4); color: white; border: none;'}">
                         ${isCompleted ? 'Desmarcar' : '✓ Hecho'}
@@ -781,6 +781,7 @@ async function openEditModal(habitId) {
     document.getElementById('habit-title').value = habit.title;
     document.getElementById('habit-description').value = habit.description || '';
     document.getElementById('habit-frequency').value = habit.frequency;
+    document.getElementById('habit-reminder').value = habit.reminder_time || '';
 
     // Cambiar el título y botón del modal
     document.getElementById('habit-modal-heading').textContent = 'Editar hábito';
@@ -801,6 +802,7 @@ function closeHabitModal() {
     document.getElementById('habit-modal-heading').textContent = 'Nuevo hábito';
     document.getElementById('habit-submit-btn').textContent = 'Crear';
     document.getElementById('btn-add-habit').focus();
+    document.getElementById('habit-reminder').value = '';
 }
 
 // Modificar el handler del formulario para manejar edición
@@ -809,6 +811,7 @@ habitForm.addEventListener('submit', async event => {
     const title = document.getElementById('habit-title').value.trim();
     const description = document.getElementById('habit-description').value.trim();
     const frequency = document.getElementById('habit-frequency').value;
+    const reminderTime = document.getElementById('habit-reminder').value; // ✅ NUEVO
 
     if (!title) {
         showHabitFormMessage('Escribe un título para el hábito.', true);
@@ -835,14 +838,15 @@ habitForm.addEventListener('submit', async event => {
         if (wasEditing) {
             const result = await supabaseClient
                 .from('habits')
-                .update({ title, description, frequency })
+                .update({ title, description, frequency, reminder_time: reminderTime || null })
                 .eq('id', editingHabitId)
                 .eq('user_id', user.id);
             error = result.error;
         } else {
             const result = await supabaseClient
                 .from('habits')
-                .insert({ user_id: user.id, title, description, frequency, streak_count: 0 });
+                .insert({ user_id: user.id, title, description, frequency, streak_count: 0, reminder_time: reminderTime || null })
+
             error = result.error;
         }
 
@@ -878,6 +882,27 @@ async function unsubscribeHabitRealtime() {
         await supabaseClient.removeChannel(habitRealtimeChannel);
         habitRealtimeChannel = null;
     }
+}
+
+function scheduleHabitReminders() {
+    if (Notification.permission !== 'granted') return;
+
+    const now = new Date();
+    const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+    // Revisamos todos los hábitos renderizados
+    const habitCards = document.querySelectorAll('[data-action="toggle"]');
+    
+    habitCards.forEach(btn => {
+        const habitId = btn.dataset.habitId;
+        const isCompleted = btn.dataset.completed === 'true';
+        
+        if (!isCompleted) {
+            // Buscamos la hora en el DOM (podríamos guardarla en un data-attribute también)
+            // Por simplicidad, vamos a leerla del objeto global de hábitos si lo tenemos, 
+            // o podemos agregar data-reminder="${habit.reminder_time}" al generar la tarjeta.
+        }
+    });
 }
 
 window.subscribeToRealtime = subscribeToRealtime;

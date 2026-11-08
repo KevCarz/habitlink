@@ -97,6 +97,7 @@ async function initializeAuthenticatedSession(session) {
     } finally {
         initializationPromise = null;
     }
+    initReminders();
 }
 
 async function handleSignedOut() {
