@@ -1,4 +1,4 @@
-const CACHE_NAME = 'habitlink-v1.0.3';
+const CACHE_NAME = 'habitlink-v1.0.4';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
@@ -41,6 +41,17 @@ self.addEventListener('activate', (event) => {
         })
     );
     self.clients.claim();
+});
+
+self.addEventListener('notificationclick', (event) => {
+    event.notification.close();
+    event.waitUntil(
+        self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
+            const existingClient = clients.find((client) => 'focus' in client);
+            if (existingClient) return existingClient.focus();
+            return self.clients.openWindow('./index.html');
+        })
+    );
 });
 
 // 3. Interceptación de peticiones: red primero para mantener la app actualizada

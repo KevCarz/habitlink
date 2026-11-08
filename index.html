@@ -543,6 +543,13 @@
                         </div>
                     </div>
                     <!-- Gráficas de cumplimiento semanal. Se mantienen separadas del mapa anual. -->
+                    <aside id="daily-suggestion" class="hl-card hl-card-subtle mb-6 flex items-start gap-3 p-4" aria-label="Sugerencia para hoy">
+                        <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#edf3ef] text-lg dark:bg-[#26352f]" aria-hidden="true">💡</span>
+                        <div>
+                            <p class="text-xs font-bold uppercase tracking-wide text-[#69736f] dark:text-[#abb6b0]">Sugerencia de hoy</p>
+                            <p id="daily-suggestion-text" class="mt-1 text-sm text-gray-700 dark:text-gray-200">Empieza con el hábito más pequeño y hazlo visible.</p>
+                        </div>
+                    </aside>
                     <section id="weekly-charts-container" class="hl-card hl-card-subtle mb-6 p-5" aria-labelledby="weekly-chart-heading">
                         <div class="mb-4 flex items-center justify-between">
                             <h3 id="weekly-chart-heading" class="text-sm font-semibold text-gray-700 dark:text-gray-200">Cumplimiento esta semana</h3>
@@ -716,20 +723,16 @@
                     <div>
                         <label for="habit-frequency" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Frecuencia</label>
                         <div class="mb-4">
-    <label for="habit-reminder" class="block text-sm font-medium mb-1" style="color: var(--hl-muted);">
-        ⏰ Hora de recordatorio (opcional)
-    </label>
-    <input 
-        type="time" 
-        id="habit-reminder" 
-        class="hl-input w-full"
-    >
-    <p class="text-xs mt-1" style="color: var(--hl-muted);">Te avisaremos a esta hora si no lo has completado.</p>
-</div>
                         <select id="habit-frequency" class="hl-select mt-1 block w-full px-3 py-2 text-sm">
                             <option value="daily">Diario</option>
                             <option value="weekly">Semanal (una vez por semana)</option>
                         </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="habit-reminder" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Hora de recordatorio (opcional)</label>
+                        <input type="time" id="habit-reminder" class="hl-input mt-1 w-full">
+                        <p class="mt-1 text-xs" style="color: var(--hl-muted);">Te avisaremos a esta hora si todavía falta completarlo.</p>
                     </div>
                     
                     <div id="habit-message" class="hidden text-center text-sm" role="status" aria-live="polite"></div>

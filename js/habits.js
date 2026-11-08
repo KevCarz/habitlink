@@ -73,6 +73,21 @@ function clearHabitError() {
     habitsError.classList.add('hidden');
 }
 
+function updateDailySuggestion(dailyTotal = 0, completedDaily = 0, completedTotal = 0) {
+    const suggestion = document.getElementById('daily-suggestion-text');
+    if (!suggestion) return;
+
+    if (!dailyTotal && !completedTotal) {
+        suggestion.textContent = 'Crea tu primer hábito diario con una acción concreta de menos de cinco minutos.';
+    } else if (dailyTotal > 0 && completedDaily === dailyTotal) {
+        suggestion.textContent = '¡Completaste tus hábitos diarios! Revisa tus estadísticas y celebra tu progreso.';
+    } else if (completedDaily > 0) {
+        suggestion.textContent = 'Llevas buen ritmo. Elige ahora el siguiente hábito más sencillo para mantener la inercia.';
+    } else {
+        suggestion.textContent = 'Empieza con el hábito más pequeño y hazlo visible en este mismo momento.';
+    }
+}
+
 function showHabitFormMessage(message, isError = false) {
     habitMessage.textContent = message;
     habitMessage.className = `text-center text-sm ${isError ? 'text-red-600 dark:text-red-300' : 'text-[#42695a] dark:text-[#91b8a7]'}`;
@@ -178,6 +193,7 @@ async function renderHabits() {
     
     dailySummary.textContent = `${dailyHabits.filter(h => completedToday.has(h.id)).length} de ${dailyHabits.length} hábitos diarios completados hoy`;
     weeklySummary.textContent = `${weeklyHabits.filter(h => completedThisWeek.has(h.id)).length} de ${weeklyHabits.length} hábitos semanales completados esta semana`;
+    updateDailySuggestion(dailyHabits.length, dailyHabits.filter(h => completedToday.has(h.id)).length, completedToday.size);
     emptyState.classList.add('hidden');
 
     const generateHeatmap = (habitId) => {
@@ -887,22 +903,20 @@ async function unsubscribeHabitRealtime() {
 let habitReminderInterval = null;
 
 function scheduleHabitReminders() {
-    if (Notification.permission !== 'granted') return;
+    if (!('Notification' in window) || Notification.permission !== 'granted') return;
 
     const now = new Date();
     const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+    const today = getLocalDateString(now);
 
-    // Revisamos todos los hábitos renderizados
-    const habitCards = document.querySelectorAll('[data-action="toggle"]');
-    
-    habitCards.forEach(btn => {
+    document.querySelectorAll('[data-action="toggle"][data-reminder]:not([data-completed="true"])').forEach(btn => {
         const habitId = btn.dataset.habitId;
-        const isCompleted = btn.dataset.completed === 'true';
-        
-        if (!isCompleted) {
-            // Buscamos la hora en el DOM (podríamos guardarla en un data-attribute también)
-            // Por simplicidad, vamos a leerla del objeto global de hábitos si lo tenemos, 
-            // o podemos agregar data-reminder="${habit.reminder_time}" al generar la tarjeta.
+        const reminderTime = btn.dataset.reminder;
+        const reminderKey = `habitlink-reminder-${habitId}-${today}-${reminderTime}`;
+        if (!reminderTime || reminderTime !== currentTime || localStorage.getItem(reminderKey)) return;
+        localStorage.setItem(reminderKey, 'sent');
+        if (typeof sendNotification === 'function') {
+            sendNotification('⏰ ¡Hora de tu hábito!', `Aún no has marcado: "${btn.dataset.habitTitle || 'tu hábito'}"`);
         }
     });
 }
@@ -912,59 +926,6 @@ function initReminders() {
     scheduleHabitReminders();
     habitReminderInterval = setInterval(scheduleHabitReminders, 30000);
 }
-
-// --- SISTEMA DE RECORDATORIOS POR HORA ---
-let reminderInterval = null;
-
-function startReminderChecker() {
-    // Limpiar intervalo anterior si existe
-    if (reminderInterval) clearInterval(reminderInterval);
-
-    // Revisar cada 30 segundos si hay algún recordatorio pendiente
-    reminderInterval = setInterval(() => {
-        if (Notification.permission !== 'granted') return;
-
-        const now = new Date();
-        const currentHours = String(now.getHours()).padStart(2, '0');
-        const currentMinutes = String(now.getMinutes()).padStart(2, '0');
-        const currentTime = `${currentHours}:${currentMinutes}`;
-
-        // Buscar todos los botones de hábitos que tengan recordatorio y NO estén completados
-        const pendingHabits = document.querySelectorAll('button[data-action="toggle"][data-reminder]:not([data-completed="true"])');
-
-        pendingHabits.forEach(btn => {
-            const reminderTime = btn.dataset.reminder;
-            const habitTitle = btn.closest('article').querySelector('h3').textContent;
-
-            // Si la hora actual coincide con la hora del recordatorio
-            if (reminderTime && reminderTime === currentTime) {
-                // Disparar notificación
-                const notification = new Notification('⏰ ¡Hora de tu hábito!', {
-                    body: `Aún no has marcado: "${habitTitle}"`,
-                    icon: 'https://cdn-icons-png.flaticon.com/512/2921/2921222.png',
-                    tag: `reminder-${btn.dataset.habitId}`, // Evita duplicados
-                    requireInteraction: true // Se queda en pantalla hasta que el usuario la cierre
-                });
-
-                // Opcional: reproducir un sonido suave (descomenta si quieres)
-                // const audio = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
-                // audio.play().catch(e => console.log('Audio bloqueado por el navegador'));
-
-                // Cambiar el atributo para no notificar de nuevo en el mismo minuto
-                btn.dataset.reminder = 'notified';
-            }
-        });
-    }, 30000); // Revisa cada 30 segundos
-}
-
-// Iniciar el checker cuando se cargan los hábitos
-function initReminders() {
-    if (Notification.permission === 'granted') {
-        startReminderChecker();
-    }
-}
-
-window.initReminders = initReminders;
 
 window.subscribeToRealtime = subscribeToRealtime;
 window.unsubscribeHabitRealtime = unsubscribeHabitRealtime;

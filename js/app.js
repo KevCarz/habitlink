@@ -87,6 +87,9 @@ async function initializeAuthenticatedSession(session) {
 ]);
         subscribeToRealtime(session.user.id);
         subscribeToPartnerChanges(session.user.id);
+        if (typeof initReminders === 'function') {
+            initReminders();
+        }
     })();
 
     try {
@@ -94,7 +97,6 @@ async function initializeAuthenticatedSession(session) {
     } catch (error) {
         console.error('Error iniciando la sesión:', error);
         showAppError('No se pudo cargar la aplicación. Inténtalo de nuevo.');
-        initReminders();
     } finally {
         initializationPromise = null;
     }
@@ -142,14 +144,8 @@ const viewStats = document.getElementById('view-stats');
 const badgesToggle = document.getElementById('badges-toggle');
 const badgesPanel = document.getElementById('badges-panel');
 const badgesToggleIcon = document.getElementById('badges-toggle-icon');
-// Inicializar botón de notificaciones
-    if (typeof initNotificationButton === 'function') {
-        initNotificationButton();
-    }
-
-const btnEnableNotifications = document.getElementById('btn-enable-notifications');
-if (btnEnableNotifications) {
-    btnEnableNotifications.addEventListener('click', requestNotificationPermission);
+if (typeof initNotifications === 'function') {
+    initNotifications();
 }
 
 if (badgesToggle) {
@@ -225,69 +221,6 @@ document.getElementById('stats-back-dashboard')?.addEventListener('click', () =>
     if (themeColor) themeColor.setAttribute('content', isDark ? '#171c1a' : '#f7f8f6');
 }
 
-    async function initNotificationButton() {
-    const btn = document.getElementById('btn-enable-notifications');
-    const dot = document.getElementById('notif-status-dot');
-    
-    if (!btn || !dot) return;
-
-    // Verificar permisos actuales
-    if (!('Notification' in window)) {
-        // Navegador no soporta notificaciones
-        dot.className = 'absolute -top-1 -right-1 w-3 h-3 rounded-full bg-red-500';
-        btn.title = 'Notificaciones no soportadas';
-        btn.disabled = true;
-        return;
-    }
-
-    // Actualizar UI según el estado
-    function updateButtonState() {
-        if (Notification.permission === 'granted') {
-            // ✅ Activadas: punto verde
-            dot.className = 'absolute -top-1 -right-1 w-3 h-3 rounded-full bg-green-500 animate-pulse';
-            btn.style.color = 'var(--hl-success)';
-            btn.title = 'Notificaciones activadas ✓';
-        } else if (Notification.permission === 'denied') {
-            // ❌ Bloqueadas: punto rojo
-            dot.className = 'absolute -top-1 -right-1 w-3 h-3 rounded-full bg-red-500';
-            btn.style.color = 'var(--hl-danger)';
-            btn.title = 'Notificaciones bloqueadas (configura en tu navegador)';
-            btn.disabled = true;
-        } else {
-            // ⚪ Pendientes: punto gris
-            dot.className = 'absolute -top-1 -right-1 w-3 h-3 rounded-full bg-gray-400';
-            btn.style.color = 'var(--hl-muted)';
-            btn.title = 'Activar notificaciones';
-            btn.disabled = false;
-        }
-    }
-
-    // Click para activar
-    btn.addEventListener('click', async () => {
-        if (Notification.permission === 'denied') {
-            alert('Las notificaciones están bloqueadas. Ve a la configuración de tu navegador para activarlas.');
-            return;
-        }
-
-        const permission = await Notification.requestPermission();
-        updateButtonState();
-
-        if (permission === 'granted') {
-            // Enviar notificación de prueba
-            new Notification('¡Notificaciones activadas! 🎉', {
-                body: 'Te avisaremos cuando sea hora de tus hábitos',
-                icon: 'https://cdn-icons-png.flaticon.com/512/2921/2921222.png'
-            });
-            
-            // Iniciar recordatorios
-            if (typeof initReminders === 'function') {
-                initReminders();
-            }
-        }
-    });
-
-    updateButtonState();
-}
 
     updateThemeControl(document.documentElement.classList.contains('dark'));
     const toggleTheme = () => {
